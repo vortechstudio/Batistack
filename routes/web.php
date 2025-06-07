@@ -7,6 +7,7 @@ Route::get('/auth/{provider}/redirect', [\App\Http\Controllers\AuthController::c
 Route::get('/auth/{provider}/callback', [\App\Http\Controllers\AuthController::class, 'callback'])->name('social.callback');
 
 Route::post('/upload', [\App\Http\Controllers\UploadController::class, 'store'])->name('upload');
+Route::get('/aggregate/callback', \App\Http\Controllers\AggregateController::class);
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/', \App\Livewire\Core\Dashboard::class)->name('dashboard');

@@ -4,27 +4,40 @@ namespace App\Services\Bridges;
 
 class Api
 {
-    public function __construct(
-        private string $client_id,
-        private string $client_secret,
-    )
+    private string $client_id;
+    private string $client_secret;
+
+    public function __construct()
     {
         $this->client_id = config('bridge.bridge_client_id');
         $this->client_secret = config('bridge.bridge_client_secret');
     }
 
-    public function get(string $folder, array $data): ?array
+    public function get(string $folder, array|null $data = null, string $withToken = null): ?array
     {
         try {
-            $request = \Http::withHeaders([
-                'Bridge-Version' => config('bridge.bridge_api_version'),
-                'Client-Id' => $this->client_id,
-                'Client-Secret' => $this->client_secret,
-                'accept' => 'application/json',
-                'content-type' => 'application/json',
-            ])
-                ->get(config('bridge.bridge_api_endpoint').$folder, $data)
-                ->json();
+            if($withToken) {
+                $request = \Http::withHeaders([
+                    'Bridge-Version' => config('bridge.bridge_api_version'),
+                    'Client-Id' => $this->client_id,
+                    'Client-Secret' => $this->client_secret,
+                    'accept' => 'application/json',
+                    'content-type' => 'application/json',
+                    'authorization' => 'Bearer '.$withToken,
+                ])
+                    ->get(config('bridge.bridge_api_endpoint').$folder, $data)
+                    ->json();
+            } else {
+                $request = \Http::withHeaders([
+                    'Bridge-Version' => config('bridge.bridge_api_version'),
+                    'Client-Id' => $this->client_id,
+                    'Client-Secret' => $this->client_secret,
+                    'accept' => 'application/json',
+                    'content-type' => 'application/json',
+                ])
+                    ->get(config('bridge.bridge_api_endpoint').$folder, $data)
+                    ->json();
+            }
 
             return collect($request)->toArray();
         }catch (\Exception $exception) {
@@ -34,18 +47,31 @@ class Api
         }
     }
 
-    public function post(string $folder, array $data): ?array
+    public function post(string $folder, array|null $data = null, string|null $withToken = null): ?array
     {
         try {
-            $request = \Http::withHeaders([
-                'Bridge-Version' => config('bridge.bridge_api_version'),
-                'Client-Id' => $this->client_id,
-                'Client-Secret' => $this->client_secret,
-                'accept' => 'application/json',
-                'content-type' => 'application/json',
-            ])
-                ->post(config('bridge.bridge_api_endpoint').$folder, $data)
-                ->json();
+            if ($withToken) {
+                $request = \Http::withHeaders([
+                    'Bridge-Version' => config('bridge.bridge_api_version'),
+                    'Client-Id' => $this->client_id,
+                    'Client-Secret' => $this->client_secret,
+                    'accept' => 'application/json',
+                    'authorization' => 'Bearer '.$withToken,
+                    'content-type' => 'application/json',
+                ])
+                    ->post(config('bridge.bridge_api_endpoint').$folder, $data)
+                    ->json();
+            } else {
+                $request = \Http::withHeaders([
+                    'Bridge-Version' => config('bridge.bridge_api_version'),
+                    'Client-Id' => $this->client_id,
+                    'Client-Secret' => $this->client_secret,
+                    'accept' => 'application/json',
+                    'content-type' => 'application/json',
+                ])
+                    ->post(config('bridge.bridge_api_endpoint').$folder, $data)
+                    ->json();
+            }
 
             return collect($request)->toArray();
         }catch (\Exception $exception) {
@@ -55,7 +81,7 @@ class Api
         }
     }
 
-    public function put(string $folder, array $data): ?array
+    public function put(string $folder, array|null $data = null): ?array
     {
         try {
             $request = \Http::withHeaders([
@@ -64,6 +90,7 @@ class Api
                 'Client-Secret' => $this->client_secret,
                 'accept' => 'application/json',
                 'content-type' => 'application/json',
+                'authorization' => 'Bearer '.cache('bridge_access_token'),
             ])
                 ->put(config('bridge.bridge_api_endpoint').$folder, $data)
                 ->json();
@@ -76,7 +103,7 @@ class Api
         }
     }
 
-    public function delete(string $folder, array $data): ?array
+    public function delete(string $folder, array|null $data = null): ?array
     {
         try {
             $request = \Http::withHeaders([
@@ -85,6 +112,7 @@ class Api
                 'Client-Secret' => $this->client_secret,
                 'accept' => 'application/json',
                 'content-type' => 'application/json',
+                'authorization' => 'Bearer '.cache('bridge_access_token'),
             ])
                 ->delete(config('bridge.bridge_api_endpoint').$folder, $data)
                 ->json();
