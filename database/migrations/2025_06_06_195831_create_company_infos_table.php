@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->string('num_naf')->nullable();
             $table->string('rcs')->nullable();
             $table->boolean('tva')->default(true);
+            $table->string('bridge_client_id')->nullable();
 
             $table->foreignId('company_id')->constrained()
                 ->onDelete('cascade');

@@ -12,7 +12,7 @@
             <!--begin::Logo-->
             <div class="d-flex align-items-center flex-grow-1 flex-lg-grow-0 me-lg-15">
                 <a href="{{ route('core.dashboard') }}">
-                    <img alt="Logo" src="{{ Storage::disk('public')->url('societe/logo.svg') }}" class="h-30px" />
+                    <img alt="Logo" src="{{ Storage::disk('public')->url('societe/logo.png') }}" class="h-30px" />
                 </a>
             </div>
             <!--end::Logo-->

@@ -16,6 +16,11 @@ return [
                 'slug' => 'core.settings.company',
                 'url' => '/core/settings/company',
             ],
+            [
+                'title' => 'Banque',
+                'slug' => 'core.settings.banque',
+                'url' => '/core/settings/banque',
+            ],
         ]
     ],
 ];

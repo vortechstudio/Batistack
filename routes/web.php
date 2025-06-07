@@ -12,4 +12,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/', \App\Livewire\Core\Dashboard::class)->name('dashboard');
     Route::get('/core/dashboard', \App\Livewire\Core\Dashboard::class)->name('core.dashboard');
     Route::get('/core/settings/company', \App\Livewire\Core\SettingCompany::class)->name('core.settings.company');
+    Route::get('/core/settings/banque', \App\Livewire\Core\SettingBanque::class)->name('core.settings.banque');
 });

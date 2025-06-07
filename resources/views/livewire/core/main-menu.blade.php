@@ -6,7 +6,7 @@
         <div class="app-sidebar-logo d-none d-md-flex flex-center pt-10 pb-2" id="kt_app_sidebar_logo">
             <!--begin::Logo image-->
             <a href="index.html">
-                <img alt="Logo" src="{{ Storage::disk('public')->url('societe/logo.svg') }}" class="h-30px" />
+                <img alt="Logo" src="{{ Storage::disk('public')->url('societe/logo.png') }}" class="h-30px" />
             </a>
             <!--end::Logo image-->
         </div>
