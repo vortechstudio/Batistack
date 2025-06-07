@@ -17,7 +17,7 @@ class Api
     {
         try {
             if($withToken) {
-                $request = \Http::withHeaders([
+                $request = \Http::withoutVerifying()->withHeaders([
                     'Bridge-Version' => config('bridge.bridge_api_version'),
                     'Client-Id' => $this->client_id,
                     'Client-Secret' => $this->client_secret,
@@ -28,7 +28,7 @@ class Api
                     ->get(config('bridge.bridge_api_endpoint').$folder, $data)
                     ->json();
             } else {
-                $request = \Http::withHeaders([
+                $request = \Http::withoutVerifying()->withHeaders([
                     'Bridge-Version' => config('bridge.bridge_api_version'),
                     'Client-Id' => $this->client_id,
                     'Client-Secret' => $this->client_secret,
@@ -51,7 +51,7 @@ class Api
     {
         try {
             if ($withToken) {
-                $request = \Http::withHeaders([
+                $request = \Http::withoutVerifying()->withHeaders([
                     'Bridge-Version' => config('bridge.bridge_api_version'),
                     'Client-Id' => $this->client_id,
                     'Client-Secret' => $this->client_secret,
@@ -62,7 +62,7 @@ class Api
                     ->post(config('bridge.bridge_api_endpoint').$folder, $data)
                     ->json();
             } else {
-                $request = \Http::withHeaders([
+                $request = \Http::withoutVerifying()->withHeaders([
                     'Bridge-Version' => config('bridge.bridge_api_version'),
                     'Client-Id' => $this->client_id,
                     'Client-Secret' => $this->client_secret,
@@ -84,7 +84,7 @@ class Api
     public function put(string $folder, array|null $data = null): ?array
     {
         try {
-            $request = \Http::withHeaders([
+            $request = \Http::withoutVerifying()->withHeaders([
                 'Bridge-Version' => config('bridge.bridge_api_version'),
                 'Client-Id' => $this->client_id,
                 'Client-Secret' => $this->client_secret,
@@ -106,7 +106,7 @@ class Api
     public function delete(string $folder, array|null $data = null): ?array
     {
         try {
-            $request = \Http::withHeaders([
+            $request = \Http::withoutVerifying()->withHeaders([
                 'Bridge-Version' => config('bridge.bridge_api_version'),
                 'Client-Id' => $this->client_id,
                 'Client-Secret' => $this->client_secret,

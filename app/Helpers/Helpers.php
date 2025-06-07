@@ -29,4 +29,9 @@ class Helpers
             }
         }
     }
+
+    public static function eur(string|int $number): string
+    {
+        return number_format($number, 2, ',', ' ')." €";
+    }
 }

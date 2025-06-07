@@ -24,7 +24,7 @@ class SettingBanque extends Component
 
         if (!$this->company->info->bridge_client_id) {
             $user_account = $bridge->post('aggregation/users', [
-                "external_user_id" => "USER".auth()->user()->id,
+                "external_user_id" => "USER".rand(1,5000),
             ]);
             $this->company->info->update(['bridge_client_id' => $user_account['uuid']]);
         }

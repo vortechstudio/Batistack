@@ -22,7 +22,7 @@
                     </div>
                 </div>
             @else
-
+                @livewire('core.setting-bank-card')
             @endif
         </div>
     </div>

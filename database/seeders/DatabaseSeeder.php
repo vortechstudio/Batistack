@@ -6,6 +6,7 @@ use App\Models\Core\Company;
 use App\Models\Core\PlanComptable;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Services\Bridges\Api;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -16,6 +17,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // User::factory(10)->create();
+        //$this->deleteAllBridge();
 
         User::factory()->create([
             'name' => 'Test User',
@@ -95,5 +97,15 @@ class DatabaseSeeder extends Seeder
             }
         }
 
+    }
+    private function deleteAllBridge()
+    {
+        $bridge = new Api();
+        $users = $bridge->get('aggregation/users');
+        dd($users);
+
+        foreach ($users['value']['resources'] as $resource) {
+            $bridge->delete('aggregation/users/'.$resource['uuid']);
+        }
     }
 }

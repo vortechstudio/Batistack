@@ -2,8 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enum\Core\UserRole;
+use App\Jobs\Core\AggregateBankMouvement;
 use App\Models\Core\BanqueAggregate;
+use App\Models\Core\BanqueAggregateAccount;
+use App\Models\Core\BanqueAggregateMouvement;
 use App\Models\Core\Company;
+use App\Models\User;
+use App\Notifications\Core\AggregateAccountNotificationSuccessful;
 use App\Services\Bridges\Api;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -43,6 +49,24 @@ class AggregateController extends Controller
             'banque_logo_url' => $provider['images']['logo'],
             'last_refreshed_at' => Carbon::createFromTimestamp(strtotime($item['last_successful_refresh']))
         ]);
+
+        $accounts = $bridge->get('aggregation/accounts', ['item_id' => $request->get('item_id')], cache('bridge_access_token'));
+
+        foreach ($accounts['resources'] as $account) {
+            $cpt = BanqueAggregateAccount::updateOrCreate([
+                'account_id' => $account['id'],
+            ], [
+                "account_id" => $account['id'],
+                "name" => $account['name'],
+                "balance" => $account['balance'],
+                "instante" => $account['instant_balance'] ?? '0.00',
+                "account_type" => $account['type'],
+                "account_iban" => $account['iban'] ?? null,
+                "banque_aggregate_id" => $banque['id'],
+            ]);
+        }
+
+        AggregateBankMouvement::dispatch($banque);
 
         toastr()->addSuccess('Compte bancaire ajouté avec succès !');
         return redirect()->route('core.settings.banque');
