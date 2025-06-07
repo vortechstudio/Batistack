@@ -14,6 +14,11 @@ class BanqueAggregateAccount extends Model
         return $this->belongsTo(BanqueAggregate::class);
     }
 
+    public function mouvements()
+    {
+        return $this->hasMany(BanqueAggregateMouvement::class);
+    }
+
     protected function casts(): array
     {
         return [

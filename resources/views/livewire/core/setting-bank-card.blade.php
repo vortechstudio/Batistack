@@ -48,8 +48,12 @@
                         </div>
                         <div class="card-body">
                             <div class="tab-content">
-                                <div class="tab-pane fade show" id="{{ \Illuminate\Support\Str::slug($account->name) }}_{{ $account->id }}_mvm" role="tabpanel"></div>
-                                <div class="tab-pane fade show" id="{{ \Illuminate\Support\Str::slug($account->name) }}_{{ $account->id }}_income" role="tabpanel"></div>
+                                <div class="tab-pane fade show active" id="{{ \Illuminate\Support\Str::slug($account->name) }}_{{ $account->id }}_mvm" role="tabpanel">
+                                    @livewire('core.setting-bank-mouvement', ['account' => $account])
+                                </div>
+                                <div class="tab-pane fade show" id="{{ \Illuminate\Support\Str::slug($account->name) }}_{{ $account->id }}_income" role="tabpanel">
+                                    @livewire('core.setting-bank-income', ['account' => $account])
+                                </div>
                             </div>
                         </div>
                     </div>

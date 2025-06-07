@@ -7,6 +7,12 @@
     <link rel="shortcut icon" href="{{ Storage::disk('minio')->url('societe/favicon.ico') }}" />
     <!--begin::Fonts(mandatory for all pages)-->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
     <!--end::Fonts-->
     <!--begin::Vendor Stylesheets(used for this page only)-->
     @yield("vendor_css")
@@ -16,6 +22,7 @@
     <!--begin::Global Stylesheets Bundle(mandatory for all pages)-->
     <link href="{{ asset('/assets/plugins/global/plugins.bundle.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('/assets/css/style.bundle.css') }}" rel="stylesheet" type="text/css" />
+    @filamentStyles
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <!--end::Global Stylesheets Bundle-->
     <script>// Frame-busting to prevent site from being loaded within a frame without permission (click-jacking) if (window.top != window.self) { window.top.location.replace(window.self.location.href); }</script>
@@ -91,6 +98,7 @@
 <script src="{{ asset('/assets/plugins/global/plugins.bundle.js') }}"></script>
 <script src="{{ asset('/assets/js/scripts.bundle.js') }}"></script>
 <x:pharaonic-select2::scripts />
+@filamentScripts
 <!--end::Global Javascript Bundle-->
 <!--begin::Vendors Javascript(used for this page only)-->
 @yield("bundle_scripts")
