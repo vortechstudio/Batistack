@@ -23,4 +23,27 @@ return [
             ],
         ]
     ],
+    [
+        'name' => "Tiers",
+        'slug' => 'tiers',
+        'icon' => 'fa-users',
+        'url' => '/tiers/dashboard',
+        'submenus' => [
+            [
+                'title' => 'Tableau de bord',
+                'slug' => 'tiers.dashboard',
+                'url' => '/tiers/dashboard',
+            ],
+            [
+                'title' => 'Fournisseurs',
+                'slug' => 'tiers.fournisseur.index',
+                'url' => '/tiers/fournisseur',
+            ],
+            [
+                'title' => 'Clients',
+                'slug' => 'tiers.client.index',
+                'url' => '/tiers/client',
+            ],
+        ]
+    ]
 ];

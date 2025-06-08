@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Enum\Tiers;
+
+enum Nature: string
+{
+    case FOURNISSEUR = 'fournisseur';
+    case CLIENT = 'client';
+    case PROSPECT = 'prospect';
+
+    public function label():string
+    {
+        return match ($this) {
+            self::FOURNISSEUR => 'F',
+            self::CLIENT => 'C',
+            self::PROSPECT => 'P',
+        };
+    }
+
+    public function color()
+    {
+        return match ($this) {
+            self::FOURNISSEUR => 'red',
+            self::CLIENT => 'green',
+            self::PROSPECT => 'blue',
+        };
+    }
+}

@@ -14,4 +14,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/core/dashboard', \App\Livewire\Core\Dashboard::class)->name('core.dashboard');
     Route::get('/core/settings/company', \App\Livewire\Core\SettingCompany::class)->name('core.settings.company');
     Route::get('/core/settings/banque', \App\Livewire\Core\SettingBanque::class)->name('core.settings.banque');
+
+    Route::prefix('tiers')->group(function () {
+        Route::get('dashboard', \App\Livewire\Tiers\Dashboard::class)->name('tiers.dasboard');
+        Route::get('fournisseur', \App\Livewire\Tiers\Dashboard::class)->name('tiers.fournisseur.index');
+        Route::get('client', \App\Livewire\Tiers\Dashboard::class)->name('tiers.client.index');
+    });
 });
