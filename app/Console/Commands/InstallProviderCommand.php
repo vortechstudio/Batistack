@@ -3,7 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Models\Core\City;
+use App\Models\Core\ConditionReglement;
 use App\Models\Core\Country;
+use App\Models\Core\ModeReglement;
 use App\Models\Core\PlanComptable;
 use Illuminate\Console\Command;
 
@@ -32,6 +34,11 @@ class InstallProviderCommand extends Command
         $this->installCPG();
         $this->newLine(1);
         $this->installCountries();
+        $this->newLine(1);
+        $this->installConditionReglement();
+        $this->newLine(1);
+        $this->installModeReglement();
+        $this->newLine(1);
     }
 
     private function installCPG(): void
@@ -124,6 +131,117 @@ class InstallProviderCommand extends Command
             ]);
             $bar->advance();
         }
+        $bar->finish();
+    }
+
+    private function installConditionReglement()
+    {
+        $this->info("Installation des conditions de reglements");
+        $bar = $this->output->createProgressBar(10);
+        ConditionReglement::create([
+            "code" => "RECEP",
+            "libelle" => "A Réception",
+            "libelle_document" => "A réception",
+            "nb_jours" => 1,
+            "fin_de_mois" => 0
+        ]);
+        $bar->advance();
+
+        ConditionReglement::create([
+            "code" => "30D",
+            "libelle" => "30 Jours",
+            "libelle_document" => "Réglement à 30 jours",
+            "nb_jours" => 30,
+            "fin_de_mois" => 0
+        ]);
+        $bar->advance();
+
+        ConditionReglement::create([
+            "code" => "30DM",
+            "libelle" => "30 Jours fin de mois",
+            "libelle_document" => "Réglement à 30 jours fin de mois",
+            "nb_jours" => 30,
+            "fin_de_mois" => 1
+        ]);
+        $bar->advance();
+
+        ConditionReglement::create([
+            "code" => "60D",
+            "libelle" => "60 Jours",
+            "libelle_document" => "Réglement à 60 jours",
+            "nb_jours" => 60,
+            "fin_de_mois" => 0
+        ]);
+        $bar->advance();
+
+        ConditionReglement::create([
+            "code" => "60DM",
+            "libelle" => "60 Jours fin de mois",
+            "libelle_document" => "Réglement à 60 jours fin de mois",
+            "nb_jours" => 60,
+            "fin_de_mois" => 1
+        ]);
+        $bar->advance();
+
+        ConditionReglement::create([
+            "code" => "PT_ORDER",
+            "libelle" => "A Commande",
+            "libelle_document" => "A réception de la commande",
+            "nb_jours" => 1,
+            "fin_de_mois" => 0
+        ]);
+        $bar->advance();
+
+        ConditionReglement::create([
+            "code" => "PT_DELIVERY",
+            "libelle" => "A livraison",
+            "libelle_document" => "Règlement à la livraison",
+            "nb_jours" => 1,
+            "fin_de_mois" => 0
+        ]);
+        $bar->advance();
+
+        ConditionReglement::create([
+            "code" => "PT_5050",
+            "libelle" => "50/50",
+            "libelle_document" => "50% acompte commande / 50% à la livraison",
+            "nb_jours" => 1,
+            "fin_de_mois" => 0
+        ]);
+        $bar->advance();
+
+        ConditionReglement::create([
+            "code" => "14D",
+            "libelle" => "14 Jours",
+            "libelle_document" => "14 Jours",
+            "nb_jours" => 14,
+            "fin_de_mois" => 0
+        ]);
+        $bar->advance();
+
+        ConditionReglement::create([
+            "code" => "14DM",
+            "libelle" => "14 Jours fin de mois",
+            "libelle_document" => "Sous 14 jours suivant la fin du mois",
+            "nb_jours" => 14,
+            "fin_de_mois" => 1
+        ]);
+        $bar->finish();
+    }
+
+    private function installModeReglement()
+    {
+        $this->info("Installation des modes de reglements");
+        $bar = $this->output->createProgressBar(8);
+        $bar->start();
+        ModeReglement::create(["code" => "CB", "libelle" => "Carte Bancaire"]); $bar->advance();
+        ModeReglement::create(["code" => "CHQ", "libelle" => "Chèque"]);  $bar->advance();
+        ModeReglement::create(["code" => "LCR", "libelle" => "LCR"]);  $bar->advance();
+        ModeReglement::create(["code" => "PPL", "libelle" => "Paypal"]);   $bar->advance();
+        ModeReglement::create(["code" => "PRE", "libelle" => "Prélèvement Bancaire"]); $bar->advance();
+        ModeReglement::create(["code" => "TIP", "libelle" => "TIP (Titre Interbancaire de paiement)"]);  $bar->advance();
+        ModeReglement::create(["code" => "TRA", "libelle" => "Traite"]);   $bar->advance();
+        ModeReglement::create(["code" => "VIR", "libelle" => "Virement Bancaire"]);  $bar->advance();
         $bar->finish();
     }
 }

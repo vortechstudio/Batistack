@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Tiers\Tiers;
+use App\Services\Bridges\Api;
 use App\Services\Search;
 
 class TestController extends Controller
 {
     public function __invoke()
     {
-        $search = new Search();
-        dd($search->searchCityByCode(44190));
+        dd(Api::getProvidersToSelect());
     }
 }

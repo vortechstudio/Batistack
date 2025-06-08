@@ -125,4 +125,17 @@ class Api
         }
     }
 
+    public static function getProvidersToSelect()
+    {
+        $api = new Api();
+        $resources = collect($api->get('providers?limit=500&country_code=FR')['resources'])
+            ->mapWithKeys(function ($resource) {
+                return [
+                    $resource['name'] => "<div class='d-flex flex-row align-items-center'><img alt src='".$resource['images']['logo']."' class='img-thumbnail w-30px' /> ".$resource['name']."</div>"
+                ];
+            })->toArray();
+
+        return $resources;
+    }
+
 }

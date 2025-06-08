@@ -10,9 +10,9 @@ return new class extends Migration {
     {
         Schema::create('tiers_contacts', function (Blueprint $table) {
             $table->id();
-            $table->string('nom');
-            $table->string('prenom');
-            $table->string('titre');
+            $table->string('nom')->nullable();
+            $table->string('prenom')->nullable();
+            $table->string('titre')->nullable();
             $table->string('poste')->nullable();
             $table->string('phone')->nullable();
             $table->string('portable')->nullable();

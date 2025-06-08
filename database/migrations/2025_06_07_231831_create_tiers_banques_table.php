@@ -10,14 +10,14 @@ return new class extends Migration {
     {
         Schema::create('tiers_banques', function (Blueprint $table) {
             $table->id();
-            $table->string('libelle');
-            $table->string('banque');
-            $table->string('code_banque');
-            $table->string('code_guichet');
-            $table->string('num_compte');
-            $table->string('cle');
-            $table->string('iban');
-            $table->string('bic');
+            $table->string('libelle')->nullable();
+            $table->string('banque')->nullable();
+            $table->string('code_banque')->nullable();
+            $table->string('code_guichet')->nullable();
+            $table->string('num_compte')->nullable();
+            $table->string('cle')->nullable();
+            $table->string('iban')->nullable();
+            $table->string('bic')->nullable();
             $table->foreignIdFor(Tiers::class)->constrained('tiers');
         });
     }

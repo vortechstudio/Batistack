@@ -15,8 +15,8 @@ return new class extends Migration {
             $table->string('code_tiers');
             $table->string('siren');
             $table->string('siret');
-            $table->boolean('tva');
-            $table->string('num_tva');
+            $table->boolean('tva')->default(false);
+            $table->string('num_tva')->nullable();
         });
     }
 
