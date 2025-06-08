@@ -11,7 +11,9 @@ use App\Models\Core\ModeReglement;
 use App\Models\Core\PlanComptable;
 use App\Models\Tiers\Tiers;
 use App\Models\Tiers\TiersAddress;
+use App\Models\Tiers\TiersBanque;
 use App\Models\Tiers\TiersContact;
+use App\Models\Tiers\TiersFournisseur;
 use App\Rules\Siren;
 use App\Services\Bridges\Api;
 use App\Services\Search;
@@ -268,7 +270,7 @@ class Create extends Component implements HasForms, HasActions
     public function submit()
     {
         $data = $this->form->getState();
-        $tiers = Tiers::create([
+        Tiers::create([
             "name" => $data['name'],
             "nature" => $data['nature'],
             "type" =>  $data['type'],
@@ -279,7 +281,7 @@ class Create extends Component implements HasForms, HasActions
             "num_tva" => $data['tva'] ? $data['num_tva'] : null,
         ]);
 
-        $tiers = Tiers::latest()->first();
+        $tiers = Tiers::orderBy('id', 'DESC')->limit(1)->first();
 
         TiersAddress::create([
             'address' =>  $data['address'],
@@ -302,7 +304,7 @@ class Create extends Component implements HasForms, HasActions
         }
 
         if($data['code_comptable_fournisseur'] !== null) {
-            $tiers->fournisseur->create([
+            TiersFournisseur::create([
                 "code_comptable_fournisseur" =>   $data['code_comptable_fournisseur'],
                 "condition_rglt" =>    $data['condition_rglt'],
                 "mode_rglt" =>   $data['mode_rglt'],
@@ -314,7 +316,7 @@ class Create extends Component implements HasForms, HasActions
         }
 
         if($data['libelle'] !== null) {
-            $tiers->banques->create([
+            TiersBanque::create([
                 "libelle" =>  $data['libelle'],
                 "banque" =>   $data['banque'],
                 "code_banque" =>   $data['code_banque'],

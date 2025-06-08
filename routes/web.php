@@ -20,6 +20,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('dashboard', \App\Livewire\Tiers\Dashboard::class)->name('tiers.dasboard');
         Route::get('fournisseur', \App\Livewire\Tiers\Fournisseur::class)->name('tiers.fournisseur.index');
         Route::get('fournisseur/create', \App\Livewire\Tiers\Fournisseur\Create::class)->name('tiers.fournisseur.create');
+        Route::get('fournisseur/{tiers}', \App\Livewire\Tiers\Fournisseur\Show::class)->name('tiers.fournisseur.show');
         Route::get('client', \App\Livewire\Tiers\Dashboard::class)->name('tiers.client.index');
     });
 });

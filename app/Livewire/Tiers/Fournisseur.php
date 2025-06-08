@@ -19,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -59,10 +60,10 @@ class Fournisseur extends Component implements HasForms, HasTable, HasActions
             ->query(
                 Tiers::query()
                 ->where('nature', 'fournisseur')
+                    ->with('addresses', 'contacts')
                 ->newQuery(),
             )
             ->columns([
-                CheckboxColumn::make('checkin'),
                 TextColumn::make('name')
                 ->label('Nom du tier')
                 ->searchable()
@@ -73,17 +74,43 @@ class Fournisseur extends Component implements HasForms, HasTable, HasActions
                 ->searchable()
                 ->sortable(),
 
-                TextColumn::make('cp')
+                TextColumn::make('addresses.cp')
                 ->label('Code Postal')
                 ->searchable()
                 ->sortable(),
 
-                TextColumn::make('phone')
+                TextColumn::make('contacts.phone')
                 ->label('Telephone')
                 ->searchable(),
 
                 TextColumn::make('type')
-                ->label('Type du Tier')
+                    ->label('Type du Tier')
+                    ->formatStateUsing(fn ($state) => Str::ucfirst($state->label()))
+
+            ])
+            ->actions([
+                Action::make('view')
+                    ->icon('heroicon-s-eye')
+                    ->iconSize('lg')
+                    ->color('primary')
+                    ->label('')
+                    ->url(fn (Tiers $tiers) => route('tiers.fournisseur.show', $tiers)),
+
+                Action::make('edit')
+                    ->icon('heroicon-s-pencil')
+                    ->iconSize('lg')
+                    ->color('info')
+                    ->label(''),
+
+                Action::make('delete')
+                    ->icon('heroicon-s-trash')
+                    ->iconSize('lg')
+                    ->requiresConfirmation()
+                    ->modalHeading("Suppression du fournisseur")
+                    ->modalDescription("Etes-vous sur de vouloir supprimer le fournisseur ?")
+                    ->color('danger')
+                    ->label('')
+                    ->action(fn (Tiers $tiers) => $tiers->delete()),
             ]);
     }
 
