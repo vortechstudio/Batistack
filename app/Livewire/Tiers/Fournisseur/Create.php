@@ -329,6 +329,11 @@ class Create extends Component implements HasForms, HasActions
             ]);
         }
 
+        $tiers->logs()->create([
+            "libelle" => "Création du tiers: ".$tiers->name,
+            "user_id" => auth()->user()->id,
+            "tiers_id" => $tiers->id,
+        ]);
         toastr()->addSuccess("Le tiers à été créer avec succès");
         $this->redirect(route('tiers.fournisseur.index'));
     }

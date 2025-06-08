@@ -36,6 +36,11 @@ class Tiers extends Model
         return $this->hasMany(TiersContact::class);
     }
 
+    public function logs(): Tiers|\Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TiersLog::class);
+    }
+
     protected function casts(): array
     {
         return [

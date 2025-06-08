@@ -20,9 +20,9 @@ enum Nature: string
     public function color()
     {
         return match ($this) {
-            self::FOURNISSEUR => 'red',
-            self::CLIENT => 'green',
-            self::PROSPECT => 'blue',
+            self::FOURNISSEUR => 'danger',
+            self::CLIENT => 'primary',
+            self::PROSPECT => 'info',
         };
     }
 }
