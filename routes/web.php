@@ -8,6 +8,7 @@ Route::get('/auth/{provider}/callback', [\App\Http\Controllers\AuthController::c
 
 Route::post('/upload', [\App\Http\Controllers\UploadController::class, 'store'])->name('upload');
 Route::get('/aggregate/callback', \App\Http\Controllers\AggregateController::class);
+Route::get('/test', \App\Http\Controllers\TestController::class);
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/', \App\Livewire\Core\Dashboard::class)->name('dashboard');
@@ -17,7 +18,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('tiers')->group(function () {
         Route::get('dashboard', \App\Livewire\Tiers\Dashboard::class)->name('tiers.dasboard');
-        Route::get('fournisseur', \App\Livewire\Tiers\Dashboard::class)->name('tiers.fournisseur.index');
+        Route::get('fournisseur', \App\Livewire\Tiers\Fournisseur::class)->name('tiers.fournisseur.index');
+        Route::get('fournisseur/create', \App\Livewire\Tiers\Fournisseur\Create::class)->name('tiers.fournisseur.create');
         Route::get('client', \App\Livewire\Tiers\Dashboard::class)->name('tiers.client.index');
     });
 });

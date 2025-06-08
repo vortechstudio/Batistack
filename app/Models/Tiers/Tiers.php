@@ -3,6 +3,7 @@
 namespace App\Models\Tiers;
 
 use App\Enum\Tiers\Nature;
+use App\Enum\Tiers\Type;
 use Illuminate\Database\Eloquent\Model;
 
 class Tiers extends Model
@@ -15,6 +16,7 @@ class Tiers extends Model
         return [
             'tva' => 'boolean',
             'nature' => Nature::class,
+            'type' => Type::class,
         ];
     }
 }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fdaf11b2f1dfd2fe6f53ad8cb6874873",
+    "content-hash": "0bc4f01b192d56233e1c536b07ae76e2",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -4640,6 +4640,78 @@
                 "source": "https://github.com/paragonie/random_compat"
             },
             "time": "2020-10-15T08:29:30+00:00"
+        },
+        {
+            "name": "ph-7/eu-vat-validator",
+            "version": "3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/pH-7/eu-vat-validator.git",
+                "reference": "03dc5305984ad71a71c363ab4cb1f691a5d9408b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/pH-7/eu-vat-validator/zipball/03dc5305984ad71a71c363ab4cb1f691a5d9408b",
+                "reference": "03dc5305984ad71a71c363ab4cb1f691a5d9408b",
+                "shasum": ""
+            },
+            "require": {
+                "ext-soap": "*",
+                "php": ">=7.1.0"
+            },
+            "require-dev": {
+                "phake/phake": "^3.1",
+                "phpunit/phpunit": "^7.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "PH7\\Eu\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Pierre-Henry Soria",
+                    "email": "hi@ph7.me",
+                    "homepage": "https://github.com/pH-7/eu-vat-validator",
+                    "role": "Software Engineer"
+                }
+            ],
+            "description": "A simple and clean PHP class that validates EU VAT numbers against the central ec.europa.eu database (using the official europa API).",
+            "homepage": "https://pierrehenry.be",
+            "keywords": [
+                "TVA",
+                "eu vat",
+                "tva number",
+                "validate eu vat",
+                "validate vat number",
+                "validation",
+                "validator",
+                "vat",
+                "vat number",
+                "vat number validator",
+                "vat validator",
+                "vies"
+            ],
+            "support": {
+                "issues": "https://github.com/pH-7/eu-vat-validator/issues",
+                "source": "https://github.com/pH-7/eu-vat-validator/tree/3.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/pH-7",
+                    "type": "github"
+                },
+                {
+                    "url": "https://ko-fi.com/phenry",
+                    "type": "ko_fi"
+                }
+            ],
+            "time": "2023-01-04T11:50:01+00:00"
         },
         {
             "name": "pharaonic/livewire-select2",

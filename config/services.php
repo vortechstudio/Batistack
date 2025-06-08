@@ -41,4 +41,8 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI')
     ],
 
+    'siren_api' => [
+        'key' => env('SIREN_API_KEY'),
+    ]
+
 ];
