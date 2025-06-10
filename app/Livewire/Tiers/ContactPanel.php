@@ -3,15 +3,15 @@
 namespace App\Livewire\Tiers;
 
 use App\Models\Tiers\Tiers;
-use App\Models\Tiers\TiersAddress;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\Column;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Livewire\Component;
 
 class ContactPanel extends Component implements HasForms, HasTable
@@ -44,7 +44,10 @@ class ContactPanel extends Component implements HasForms, HasTable
                     ->label('Adresse Mail'),
             ])
             ->actions([
-
+                Action::make('call')
+                    ->icon('heroicon-s-phone')
+                    ->requiresConfirmation()
+                    ->action(fn (Model $action) => $this->redirectRoute('apps.call', ['phone' => $action->phone])),
             ]);
     }
 

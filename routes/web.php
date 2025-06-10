@@ -16,6 +16,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/core/settings/company', \App\Livewire\Core\SettingCompany::class)->name('core.settings.company');
     Route::get('/core/settings/banque', \App\Livewire\Core\SettingBanque::class)->name('core.settings.banque');
 
+    Route::prefix('apps')->group(function () {
+        Route::get('call', \App\Livewire\Apps\Calling::class)->name('apps.call');
+    });
+
     Route::prefix('tiers')->group(function () {
         Route::get('dashboard', \App\Livewire\Tiers\Dashboard::class)->name('tiers.dasboard');
         Route::get('fournisseur', \App\Livewire\Tiers\Fournisseur::class)->name('tiers.fournisseur.index');

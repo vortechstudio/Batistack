@@ -43,6 +43,12 @@ return [
 
     'siren_api' => [
         'key' => env('SIREN_API_KEY'),
-    ]
+    ],
+
+    'twilio' => [
+        'sid' => env('TWILIO_SID'),
+        'token' => env('TWILIO_TOKEN'),
+        'from' => env('TWILIO_FROM'),
+    ],
 
 ];
