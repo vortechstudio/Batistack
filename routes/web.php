@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/auth/{provider}/redirect', [\App\Http\Controllers\AuthController::class, 'redirect'])->name('social.redirect');
 Route::get('/auth/{provider}/callback', [\App\Http\Controllers\AuthController::class, 'callback'])->name('social.callback');
+Route::get('/auth/activate/{token}', [\App\Http\Controllers\AuthController::class, 'activate'])->name('auth.activate');
+Route::post('/auth/activate', [\App\Http\Controllers\AuthController::class, 'activating'])->name('auth.activating');
 
 Route::post('/upload', [\App\Http\Controllers\UploadController::class, 'store'])->name('upload');
 Route::get('/aggregate/callback', \App\Http\Controllers\AggregateController::class);

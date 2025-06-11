@@ -1,4 +1,5 @@
 import './bootstrap';
+import { Livewire, Alpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
 
 let defaultThemeMode = "light";
 let themeMode;
@@ -17,3 +18,5 @@ if (document.documentElement) {
     }
     document.documentElement.setAttribute("data-bs-theme", themeMode);
 }
+
+Livewire.start()

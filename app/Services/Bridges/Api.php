@@ -95,6 +95,11 @@ class Api
                 ->put(config('bridge.bridge_api_endpoint').$folder, $data)
                 ->json();
 
+            $collection = collect($request)->toArray();
+            if (isset($collection['errors'][0]['message'])) {
+                throw new \Exception($collection['errors'][0]['message']);
+            }
+
             return collect($request)->toArray();
         }catch (\Exception $exception) {
             \Log::emergency($exception);
@@ -117,6 +122,11 @@ class Api
                 ->delete(config('bridge.bridge_api_endpoint').$folder, $data)
                 ->json();
 
+            $collection = collect($request)->toArray();
+            if (isset($collection['errors'][0]['message'])) {
+                throw new \Exception($collection['errors'][0]['message']);
+            }
+
             return collect($request)->toArray();
         }catch (\Exception $exception) {
             \Log::emergency($exception);
@@ -125,7 +135,7 @@ class Api
         }
     }
 
-    public static function getProvidersToSelect()
+    public static function getProvidersToSelect(): array
     {
         $api = new Api();
         $resources = collect($api->get('providers?limit=500&country_code=FR')['resources'])

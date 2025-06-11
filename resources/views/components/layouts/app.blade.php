@@ -4,7 +4,7 @@
     <title>{{ config('app.name') }} - {{ $title ?? 'Page Title' }}</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="shortcut icon" href="{{ Storage::disk('minio')->url('societe/favicon.ico') }}" />
+    <link rel="shortcut icon" href="{{ Storage::disk('public')->url('/societe/favicon.ico') }}" />
     <!--begin::Fonts(mandatory for all pages)-->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />
 
@@ -16,11 +16,9 @@
     <!--end::Fonts-->
     <!--begin::Vendor Stylesheets(used for this page only)-->
     @yield("vendor_css")
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" integrity="sha512-tS3S5qG0BlhnQROyJXvNjeEM4UpMXHrQfTGmbQ1gKmelCxlSEBUaxhRBj/EFTzpbP4RVSrpEikbmdJobCvhE3g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css" integrity="sha512-sMXtMNL1zRzolHYKEujM2AqCLUR9F2C4/05cdbxjjLSRvMQIciEPCQZo++nk7go3BtSuK9kfa/s+a4f4i5pLkw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <!--end::Vendor Stylesheets-->
     <!--begin::Global Stylesheets Bundle(mandatory for all pages)-->
     @filamentStyles
+    @livewireStyles
 
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -99,6 +97,7 @@
 <script src="{{ asset('/assets/js/scripts.bundle.js') }}"></script>
 <x:pharaonic-select2::scripts />
 @filamentScripts
+@livewireScriptConfig
 <!--end::Global Javascript Bundle-->
 <!--begin::Vendors Javascript(used for this page only)-->
 @yield("bundle_scripts")

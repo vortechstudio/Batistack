@@ -34,13 +34,20 @@ class SettingBanque extends Component
         ]);
         cache()->put('bridge_access_token', $authToken['access_token']);
 
-        $session = $bridge->post('aggregation/connect-sessions', [
-            'user_email' => $this->company->email,
-            'country_code' => "FR",
-            'callback_url' => config('app.url').'/aggregate/callback',
-        ], $authToken['access_token']);
-
-        $this->redirect($session['url']);
+        try {
+            $session = $bridge->post('aggregation/connect-sessions', [
+                'user_email' => $this->company->email,
+                'country_code' => "FR",
+                'callback_url' => config('app.url') . '/aggregate/callback',
+            ], $authToken['access_token']);
+            if (array_key_exists('errors', $session)) {
+                toastr()->error($session['errors'][0]['code'], $session['errors'][0]['message']);
+            }
+            $this->redirect($session['url']);
+        } catch (\Exception $e) {
+            \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage(), ['session' => $session]);
+            toastr()->addError($e->getMessage(), null, 'Erreur');
+        }
     }
 
     #[Title('Aggrégation bancaire')]

@@ -28,4 +28,29 @@ class AuthController extends Controller
             }
         }
     }
+
+    public function activate(Request $request)
+    {
+        $auth = User::where('token', $request->token)->first();
+        return view('auth.activate', [
+            'token' => $request->token,
+            'type' => $auth->role->label()
+        ]);
+    }
+
+    public function activating(Request $request)
+    {
+        $user = User::where('token', $request->token)->first();
+        if(\Hash::check($request->password, $user->password)) {
+            $user->token = null;
+            $user->blocked = false;
+            $user->save();
+
+            toastr()->addSuccess("Votre compte à bien été activer !");
+
+            return redirect()->route('login');
+        } else {
+            return redirect()->back()->with('error', "Votre mot de passe est incorrect.");
+        }
+    }
 }

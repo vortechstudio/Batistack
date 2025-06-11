@@ -32,14 +32,17 @@
                     <div class="text-gray-600">{{ $tiers->type->label() }}</div>
                     <!--begin::Details item-->
                     <!--begin::Details item-->
+                    @if(count($tiers->addresses) > 0)
                     <div class="fw-bold mt-5">Adresse</div>
                     <div class="text-gray-600">
                         {{ $tiers->addresses->first()->address }},<br>
                         {{ $tiers->addresses->first()->cp }} {{ $tiers->addresses->first()->ville }}, <br>
                         {{ $tiers->addresses->first()->pays }}
                     </div>
+                    @endif
                     <!--begin::Details item-->
                     <!--begin::Details item-->
+                    @if(count($tiers->contacts) > 0)
                     <div class="fw-bold mt-5">Contact Principal</div>
                     <div class="text-gray-600">
                         <div class="d-flex flex-row align-items-center mb-1">
@@ -60,6 +63,7 @@
                         </div>
                     </div>
                     <!--begin::Details item-->
+                    @endif
                 </div>
             </div>
         </div>

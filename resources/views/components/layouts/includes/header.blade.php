@@ -56,9 +56,6 @@
             </div>
             <!--begin::Navbar-->
             <div class="app-navbar flex-shrink-0">
-                <!--begin::Search-->
-                @livewire('core.search-engine')
-                <!--end::Search-->
             </div>
             <!--end::Navbar-->
         </div>
