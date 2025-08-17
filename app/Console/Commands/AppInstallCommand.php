@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Module\Core\Module;
 use App\Models\Module\Core\Setting;
 use App\Services\Batistack;
 use Illuminate\Console\Command;
@@ -29,10 +30,12 @@ class AppInstallCommand extends Command
     {
         $license = $this->option('license');
 
+
         $infoLicense = $this->verificationLicense($license);
         if($infoLicense) {
             $this->verificationParametre($infoLicense);
             $this->initializeSettings($infoLicense);
+            $this->installModules($infoLicense);
         }
     }
 
@@ -69,5 +72,26 @@ class AppInstallCommand extends Command
         ]);
         $this->info("Paramètres de la license initialisés");
         $this->info("Company: " . $config->company);
+    }
+
+    public function installModules($license)
+    {
+        $this->line("Initialisation des modules saas");
+        $moduleSaas = $license['product']['included_modules'];
+
+        foreach ($moduleSaas as $module) {
+            $this->line("Installation du module " . $module['name']);
+            $module = Module::updateOrCreate(
+                ['saas_module_id' => $module['id']],
+                [
+                    "name" => $module['name'],
+                    "slug" => $module['key'],
+                    "description" => $module['description'],
+                    "is_activable" => true,
+                    "active" => false,
+                ]
+            );
+            $this->line("Module " . $module['name'] . " installé");
+        }
     }
 }
