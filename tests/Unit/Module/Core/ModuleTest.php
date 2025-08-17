@@ -4,28 +4,30 @@ use App\Models\Module\Core\Module;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 it('uses the HasFactory trait', function () {
-    /**
-     * @runInSeparateProcess
-     */
-    $uses = class_uses(Module::class);
+    $uses = class_uses_recursive(Module::class);
     expect($uses)->toContain(HasFactory::class);
 });
 
 it('has guarded property set to empty array', function () {
     $module = new Module();
-    expect($module->getGuarded())->toBe([]);
+    $reflection = new ReflectionClass($module);
+    $property = $reflection->getProperty('guarded');
+    $property->setAccessible(true);
+    expect($property->getValue($module))->toBe([]);
 });
 
 it('has casts property for is_activable', function () {
     $module = new Module();
-    expect($module->getCasts())->toHaveKey('is_activable');
-    expect($module->getCasts()['is_activable'])->toBe('boolean');
+    $casts = $module->getCasts();
+    expect($casts)->toHaveKey('is_activable');
+    expect($casts['is_activable'])->toBe('boolean');
 });
 
 it('has casts property for active', function () {
     $module = new Module();
-    expect($module->getCasts())->toHaveKey('active');
-    expect($module->getCasts()['active'])->toBe('boolean');
+    $casts = $module->getCasts();
+    expect($casts)->toHaveKey('active');
+    expect($casts['active'])->toBe('boolean');
 });
 
 it('can be instantiated', function () {

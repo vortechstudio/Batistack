@@ -4,34 +4,37 @@ use App\Models\Module\Core\Option;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 it('uses the HasFactory trait', function () {
-    /**
-     * @runInSeparateProcess
-     */
-    $uses = class_uses(Option::class);
+    $uses = class_uses_recursive(Option::class);
     expect($uses)->toContain(HasFactory::class);
 });
 
 it('has guarded property set to empty array', function () {
     $option = new Option();
-    expect($option->getGuarded())->toBe([]);
+    $reflection = new ReflectionClass($option);
+    $property = $reflection->getProperty('guarded');
+    $property->setAccessible(true);
+    expect($property->getValue($option))->toBe([]);
 });
 
 it('has casts property for is_enabled', function () {
     $option = new Option();
-    expect($option->getCasts())->toHaveKey('is_enabled');
-    expect($option->getCasts()['is_enabled'])->toBe('boolean');
+    $casts = $option->getCasts();
+    expect($casts)->toHaveKey('is_enabled');
+    expect($casts['is_enabled'])->toBe('boolean');
 });
 
 it('has casts property for expires_at', function () {
     $option = new Option();
-    expect($option->getCasts())->toHaveKey('expires_at');
-    expect($option->getCasts()['expires_at'])->toBe('date');
+    $casts = $option->getCasts();
+    expect($casts)->toHaveKey('expires_at');
+    expect($casts['expires_at'])->toBe('date');
 });
 
 it('has casts property for active', function () {
     $option = new Option();
-    expect($option->getCasts())->toHaveKey('active');
-    expect($option->getCasts()['active'])->toBe('boolean');
+    $casts = $option->getCasts();
+    expect($casts)->toHaveKey('active');
+    expect($casts['active'])->toBe('boolean');
 });
 
 it('can be instantiated', function () {
