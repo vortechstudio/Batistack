@@ -3,6 +3,8 @@ name: 📊 Code Metrics & Quality Gate
 on:
   push:
     branches: [ develop ]
+    paths:
+      - '**/*.php'
   pull_request:
     branches: [ master ]
   schedule:
