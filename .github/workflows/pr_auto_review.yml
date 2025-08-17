@@ -1,0 +1,40 @@
+name: "Auto Review de pull request"
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  auto-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Auto Review
+        uses: actions/github-script@v7
+        if: ${{ !github.event.pull_request.draft && !github.event.pull_request.head.repo.fork }}
+        with:
+          script: |
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.payload.pull_request.head.repo.owner.login,
+              repo: context.payload.pull_request.head.repo.name,
+              pull_number: context.issue.number
+            });
+
+            // Vérifications automatiques
+            const hasTests = files.some(f => f.filename.includes('test'));
+            const hasMigrations = files.some(f => f.filename.includes('migration'));
+
+            if (!hasTests && files.length > 5) {
+              await github.rest.pulls.createReview({
+                owner: context.payload.pull_request.base.repo.owner.login,
+                repo: context.payload.pull_request.base.repo.name,
+                pull_number: context.issue.number,
+                body: '⚠️ Cette PR semble importante mais ne contient pas de tests.',
+                event: 'REQUEST_CHANGES'
+              });
+            }

@@ -11,6 +11,11 @@ class ApiCheckMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
+        // Skip API check in testing environment
+        if (app()->environment('testing')) {
+            return $next($request);
+        }
+
         $batistack = new Batistack();
         // Faire l'appel API
         $response = $batistack->get('/api/health');

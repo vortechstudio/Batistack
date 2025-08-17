@@ -21,4 +21,4 @@ templates:
   - name: "Module: Core"
     description: "Issue liée au module Core"
     labels: ['module:core']
-    body: "modules/core.yml"
+    body: "core.yml"
