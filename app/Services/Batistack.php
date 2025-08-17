@@ -26,7 +26,7 @@ class Batistack
             return $response;
         } catch (Exception $e) {
             Log::error('API GET error: ' . $e->getMessage());
-            return new \Illuminate\Http\Client\Response(new \GuzzleHttp\Psr7\Response(500), [], null);
+            return new \Illuminate\Http\Client\Response(new \GuzzleHttp\Psr7\Response(500));
         }
     }
 
@@ -41,7 +41,7 @@ class Batistack
             return $response;
         } catch (Exception $e) {
             Log::error('API POST error: ' . $e->getMessage());
-            return new \Illuminate\Http\Client\Response(new \GuzzleHttp\Psr7\Response(500), [], null);
+            return new \Illuminate\Http\Client\Response(new \GuzzleHttp\Psr7\Response(500));
         }
     }
 
@@ -56,7 +56,7 @@ class Batistack
             return $response;
         } catch (Exception $e) {
             Log::error('API PUT error: ' . $e->getMessage());
-            return new \Illuminate\Http\Client\Response(new \GuzzleHttp\Psr7\Response(500), [], null);
+            return new \Illuminate\Http\Client\Response(new \GuzzleHttp\Psr7\Response(500));
         }
     }
 
@@ -71,7 +71,7 @@ class Batistack
             return $response;
         } catch (Exception $e) {
             Log::error('API DELETE error: ' . $e->getMessage());
-            return new \Illuminate\Http\Client\Response(new \GuzzleHttp\Psr7\Response(500), [], null);
+            return new \Illuminate\Http\Client\Response(new \GuzzleHttp\Psr7\Response(500));
         }
     }
 }
