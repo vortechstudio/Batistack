@@ -1,0 +1,78 @@
+name: "Module: Core"
+description: "Issue liée au module Core"
+title: "[Core] "
+labels: ['module:core']
+assignees: ''
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de remplir les informations suivantes pour nous aider à traiter votre demande de modification.
+
+  - type: dropdown
+    id: type_issue
+    attributes:
+      label: Type d'Issue
+      description: "Quel type d'issue est-ce ?"
+      options:
+        - "Bug"
+        - "Amélioration"
+        - "Nouvelle Fonctionnalité"
+      default: 0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected_composant
+    attributes:
+      label: "Composant affecté"
+      description: "Quel composant est affecté par cette issue ?"
+      options:
+        - Espace Utilisateur
+        - Configuration
+        - Authentification
+        - Divers
+      default: 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: what_went_wrong
+    attributes:
+      label: Que se passe-t-il ?
+      description: "Détaillez le problème rencontré."
+      placeholder: "Ex: Le bouton de connexion ne fonctionne plus."
+    validations:
+      required: true
+
+  - type: textarea
+    id: what_should_happen
+    attributes:
+      label: Quoi devrait se passer ?
+      description: "Détaillez ce qui devrait se passer."
+      placeholder: "Ex: Le bouton de connexion devrait fonctionner."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps_to_reproduce
+    attributes:
+      label: Comment reproduire le problème ?
+      description: "Détaillez les étapes pour reproduire le problème."
+      placeholder: "Ex: 1. Allez sur la page de connexion. 2. Entrez vos informations. 3. Cliquez sur se connecter."
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Contexte supplémentaire
+      description: "Fournissez des informations supplémentaires qui pourraient être utiles."
+      placeholder: "Ex: J'utilise l'application sur un ordinateur portable."
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        **Merci de fournir ces informations pour nous aider à résoudre le problème rapidement.**

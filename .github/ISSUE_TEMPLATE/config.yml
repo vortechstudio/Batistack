@@ -1,11 +1,24 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Ask a question
-    url: https://github.com/vortechstudio/Batistack/discussions/new?category=q-a
-    about: Ask the community for help
-  - name: Request a feature
-    url: https://github.com/vortechstudio/Batistack/discussions/new?category=ideas
-    about: Share ideas for new features
-  - name: Report a security issue
-    url: https://github.com/vortechstudio/Batistack/security/policy
-    about: Learn how to notify us for sensitive bugs
+  - name: 🆘 Support Technique
+    url: https://github.com/vortechstudio/Batistack/discussions/categories/support
+    about: Obtenir de l'aide sur la configuration ou l'utilisation
+  - name: 💡 Suggestions de Modules
+    url: https://github.com/vortechstudio/Batistack/discussions/categories/ideas
+    about: Proposer une amélioration de module existant
+
+templates:
+  - name: "🐛 Bug Report"
+    description: "Signaler un problème technique"
+    labels: ['bug']
+    body: "bug_report.md"
+
+  - name: "✨ Feature Request"
+    description: "Proposer une nouvelle fonctionnalité"
+    labels: ['feature']
+    body: "feature_request.md"
+
+  - name: "Module: Core"
+    description: "Issue liée au module Core"
+    labels: ['module:core']
+    body: "modules/core.yml"
