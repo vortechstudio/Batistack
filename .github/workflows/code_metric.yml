@@ -1,9 +1,9 @@
 name: 📊 Code Metrics & Quality Gate
 
 on:
-  push: ['develop']
+  push: [develop]
   pull_request:
-    branches: ['master']
+    branches: [master]
     types: [closed]
   schedule:
     - cron: '0 2 * * 1'
