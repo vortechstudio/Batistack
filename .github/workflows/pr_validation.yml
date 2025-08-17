@@ -1,5 +1,10 @@
-name "Validation de pull request"
+name: "Validation de pull request"
 on: [pull_request]
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: write
 
 jobs:
   checklist-verification:
