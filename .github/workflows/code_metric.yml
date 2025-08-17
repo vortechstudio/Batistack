@@ -1,12 +1,12 @@
 name: 📊 Code Metrics & Quality Gate
 
 on:
-  push: [develop]
+  push:
+    branches: [ develop ]
   pull_request:
-    branches: [master]
-    types: [closed]
+    branches: [ master ]
   schedule:
-    - cron: '0 2 * * 1'
+    - cron: '0 0 * * 0' # Every Sunday at midnight
 
 env:
   PHP_VERSION: '8.3'
@@ -209,7 +209,7 @@ jobs:
             - [Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
             - [Commit](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
 
-            ### 📋 Actions Requises
+            ### 📋 Actions Requires
             - [ ] Corriger les violations PHPStan
             - [ ] Réduire la complexité du code
             - [ ] Relancer le workflow après corrections
