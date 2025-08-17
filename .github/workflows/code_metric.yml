@@ -72,7 +72,9 @@ jobs:
       - name: Configure Laravel
         run: |
           # Créer le fichier .env à partir du secret GH_ENV
-          echo '${{ secrets.GH_ENV }}' > .env
+          cat << 'EOF' > .env
+          ${{ secrets.GH_ENV }}
+          EOF
           php artisan key:generate
 
       - name: 🧪 Run tests with coverage
@@ -130,11 +132,11 @@ jobs:
           cat > reports/metrics/quality-summary.md << EOF
           # 📊 Rapport de Qualité - $(date)
 
-          ## 🎯 Statut Global: $([ "$QUALITY_STATUS" = "success" ] && echo "✅ SUCCÈS" || echo "❌ ÉCHEC")
+          ## 🎯 Statut Global: $([ "\$QUALITY_STATUS" = "success" ] && echo "✅ SUCCÈS" || echo "❌ ÉCHEC")
 
           ## 📈 Métriques Principales
-          - **Violations PHPStan**: ${VIOLATIONS_COUNT} $([ $VIOLATIONS_COUNT -le $MAX_VIOLATIONS ] && echo "✅" || echo "❌")
-          - **Complexité moyenne**: ${COMPLEXITY_SCORE}
+          - **Violations PHPStan**: \${VIOLATIONS_COUNT} $([ \${VIOLATIONS_COUNT} -le \${MAX_VIOLATIONS} ] && echo "✅" || echo "❌")
+          - **Complexité moyenne**: \${COMPLEXITY_SCORE}
 
           ## 📁 Structure du Projet
           EOF
@@ -199,7 +201,7 @@ jobs:
             const title = `🚨 Quality Gate Failed - ${new Date().toISOString().split('T')[0]}`;
             const body = `## 🚫 Quality Gate Failure
 
-            Le workflow de métriques de code a échoué sur la branche \`${{ github.ref_name }}\`.
+            Le workflow de métriques de code a échoué sur la branche `${{ github.ref_name }}`.
 
             ### 📊 Métriques
             - **Violations PHPStan**: ${{ needs.quality-gate.outputs.violations-count }}

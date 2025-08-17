@@ -1,7 +1,7 @@
 <x-layouts.auth.simple :title="$title ?? null">
-    @isset($slot)
+    @if($slot->isNotEmpty())
         {{ $slot }}
     @else
         @yield('content')
-    @endisset
+    @endif
 </x-layouts.auth.simple>
