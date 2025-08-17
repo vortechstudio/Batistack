@@ -13,23 +13,22 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Input\ArrayInput;
-use Mockery;
 
 beforeEach(function () {
     $this->command = new AppInstallCommand();
     $this->batistackMock = Mockery::mock(Batistack::class);
     $this->app->instance(Batistack::class, $this->batistackMock);
-    
+
     // Mock l'output pour éviter les erreurs de writeln
     $this->output = new BufferedOutput();
     $this->input = new ArrayInput([]);
-    
+
     // Utiliser la réflexion pour définir l'input et l'output
     $reflection = new \ReflectionClass($this->command);
     $inputProperty = $reflection->getProperty('input');
     $inputProperty->setAccessible(true);
     $inputProperty->setValue($this->command, $this->input);
-    
+
     $outputProperty = $reflection->getProperty('output');
     $outputProperty->setAccessible(true);
     $outputProperty->setValue($this->command, $this->output);
@@ -53,7 +52,8 @@ it('validates license successfully', function () {
     $mockBatistack = Mockery::mock(Batistack::class);
     $validationResponse = Mockery::mock(Response::class);
     $infoResponse = Mockery::mock(Response::class);
-    
+
+    $validationResponse->shouldReceive('successful')->andReturn(true);
     $validationResponse->shouldReceive('json')->andReturn(['valid' => true]);
     $infoResponse->shouldReceive('json')->andReturn([
         'license_key' => $license,
@@ -66,19 +66,19 @@ it('validates license successfully', function () {
         ],
         'expires_at' => '2024-12-31'
     ]);
-    
+
     $mockBatistack->shouldReceive('get')
         ->with('/license/validate', ['license_key' => $license])
         ->andReturn($validationResponse);
-    
+
     $mockBatistack->shouldReceive('get')
         ->with('/license/info', ['license_key' => $license])
         ->andReturn($infoResponse);
-    
+
     $this->app->instance(Batistack::class, $mockBatistack);
-    
+
     $result = $this->command->verificationLicense($license);
-    
+
     expect($result)->toBeArray();
     expect($result['license_key'])->toBe($license);
 });
@@ -87,23 +87,24 @@ it('returns null for invalid license', function () {
     $license = 'invalid-license-key';
     $mockBatistack = Mockery::mock(Batistack::class);
     $validationResponse = Mockery::mock(Response::class);
-    
+
+    $validationResponse->shouldReceive('successful')->andReturn(true);
     $validationResponse->shouldReceive('json')->andReturn([]);
-    
+
     $mockBatistack->shouldReceive('get')
         ->with('/license/validate', ['license_key' => $license])
         ->andReturn($validationResponse);
-    
+
     $this->app->instance(Batistack::class, $mockBatistack);
-    
+
     $result = $this->command->verificationLicense($license);
-    
-    expect($result)->toBeNull();
+
+    expect($result)->toBeFalse();
 });
 
 it('initializes settings correctly', function () {
     $mockSetting = Mockery::mock('alias:' . Setting::class);
-    
+
     $licenseData = [
         'license_key' => 'test-license-key',
         'customer' => ['company_name' => 'Test Company'],
@@ -115,7 +116,7 @@ it('initializes settings correctly', function () {
         ],
         'expires_at' => '2024-12-31'
     ];
-    
+
     $mockSetting->shouldReceive('updateOrCreate')->with(
         ['license_key' => 'test-license-key'],
         [
@@ -128,20 +129,20 @@ it('initializes settings correctly', function () {
             'expired_at' => '2024-12-31'
         ]
     )->once()->andReturn((object)['company' => 'Test Company']);
-    
+
     $reflection = new \ReflectionClass($this->command);
     $method = $reflection->getMethod('initializeSettings');
     $method->setAccessible(true);
-    
+
     $method->invoke($this->command, $licenseData);
-    
+
     // Les expectations sont vérifiées automatiquement par Mockery
     expect(true)->toBeTrue();
 });
 
 it('installs modules correctly', function () {
     $mockModule = Mockery::mock('alias:' . Module::class);
-    
+
     $licenseData = [
         'license_key' => 'test-license',
         'customer' => ['company_name' => 'Test Company'],
@@ -161,12 +162,12 @@ it('installs modules correctly', function () {
         ],
         'expires_at' => '2024-12-31'
     ];
-    
+
     // Create a mock that behaves like both object and array
     $moduleObject = Mockery::mock('ArrayAccess');
     $moduleObject->shouldReceive('offsetGet')->with('name')->andReturn('Test Module');
     $moduleObject->name = 'Test Module';
-    
+
     $mockModule->shouldReceive('updateOrCreate')->with(
         ['saas_module_id' => 1],
         [
@@ -177,20 +178,20 @@ it('installs modules correctly', function () {
             'active' => false
         ]
     )->once()->andReturn($moduleObject);
-    
+
     $reflection = new \ReflectionClass($this->command);
     $method = $reflection->getMethod('installModules');
     $method->setAccessible(true);
-    
+
     $method->invoke($this->command, $licenseData);
-    
+
     // Les expectations sont vérifiées automatiquement par Mockery
     expect(true)->toBeTrue();
 });
 
 it('installs options correctly', function () {
     $mockOption = Mockery::mock('alias:' . Option::class);
-    
+
     $licenseData = [
         'license_key' => 'test-license',
         'customer' => ['company_name' => 'Test Company'],
@@ -214,10 +215,10 @@ it('installs options correctly', function () {
         ],
         'expires_at' => '2024-12-31'
     ];
-    
+
     $optionObject = new \stdClass();
     $optionObject->name = 'Test Option';
-    
+
     $mockOption->shouldReceive('updateOrCreate')->with(
         ['saas_option_id' => 1],
         [
@@ -230,13 +231,13 @@ it('installs options correctly', function () {
             'saas_option_id' => 1
         ]
     )->once()->andReturn($optionObject);
-    
+
     $reflection = new \ReflectionClass($this->command);
     $method = $reflection->getMethod('installOptions');
     $method->setAccessible(true);
-    
+
     $method->invoke($this->command, $licenseData);
-    
+
     // Les expectations sont vérifiées automatiquement par Mockery
     expect(true)->toBeTrue();
 });

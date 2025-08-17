@@ -31,6 +31,10 @@ class AppInstallCommand extends Command
     {
         $license = $this->option('license');
 
+        if (empty($license)) {
+            $this->error('License parameter is required. Use --license=your_license_key');
+            return Command::FAILURE;
+        }
 
         $infoLicense = $this->verificationLicense($license);
         if($infoLicense) {
@@ -43,35 +47,64 @@ class AppInstallCommand extends Command
 
     public function verificationLicense($license)
     {
-        $response = app(Batistack::class)->get('/license/validate', ['license_key' => $license]);
-        if (!empty($response->json())) {
-            $this->info("Status de la license: License Valide");
-            return app(Batistack::class)->get('/license/info', ['license_key' => $license])->json();
-        } else {
-            $this->error("Status de la license: License Invalide");
+        $response = app(Batistack::class)
+            ->get('/license/validate', ['license_key' => $license]);
+
+        if (!$response->successful()) {
+            $this->error('Erreur lors de la validation de la licence');
+            return false;
         }
+
+        $validationData = $response->json();
+
+        if (empty($validationData) || !isset($validationData['valid']) || $validationData['valid'] !== true) {
+            $this->error('Licence invalide ou données de validation manquantes');
+            return false;
+        }
+
+        $this->info("Status de la license: License Valide");
+        return app(Batistack::class)
+            ->get('/license/info', ['license_key' => $license])
+            ->json();
     }
 
     public function verificationParametre($license)
     {
-        $this->info("Produit: " . $license['product']['name']);
-        $this->info("Parametre de la license: License attribué à " . $license['domain']);
-        $this->info("Parametre de la license: License Max Users " . $license['max_users']);
-        $this->info("Parametre de la license: License Max Folders " . $license['product']['max_projects']);
+        if (!is_array($license)) {
+            $this->error("Invalid license data provided to verificationParametre.");
+            return;
+        }
+
+        $productName = $license['product']['name'] ?? 'unknown product';
+        $domain = $license['domain'] ?? 'unknown domain';
+        $maxUsers = $license['max_users'] ?? 0;
+        $maxProjects = $license['product']['max_projects'] ?? 0;
+
+        $this->info("Produit: " . $productName);
+        $this->info("Parametre de la license: License attribué à " . $domain);
+        $this->info("Parametre de la license: License Max Users " . $maxUsers);
+        $this->info("Parametre de la license: License Max Folders " . $maxProjects);
+
+        if ($productName === 'unknown product' || $domain === 'unknown domain' || $maxUsers === 0 || $maxProjects === 0) {
+            $this->warn("Warning: Some critical license parameters are missing or invalid.");
+        }
     }
 
     public function initializeSettings($license)
     {
         $this->line("Initialisation des paramètres de la license");
-        $config = Setting::updateOrCreate(["license_key" => $license['license_key']], [
-            "company" => $license['customer']['company_name'],
-            "license_key" => $license['license_key'],
-            "status" => $license['status'],
-            "max_users" => $license['max_users'],
-            "max_folders" => $license['product']['max_projects'],
-            "max_storages" => $license['product']['storage_limit'],
-            "expired_at" => $license['expires_at'],
-        ]);
+        $config = Setting::updateOrCreate(
+            ["license_key" => $license['license_key']],
+            [
+                "company"      => $license['customer']['company_name']    ?? null,
+                "license_key"  => $license['license_key'],
+                "status"       => $license['status']                      ?? null,
+                "max_users"    => $license['max_users']                   ?? 0,
+                "max_folders"  => $license['product']['max_projects']     ?? 0,
+                "max_storages" => $license['product']['storage_limit']    ?? 0,
+                "expired_at"   => $license['expires_at']                  ?? null,
+            ]
+        );
         $this->info("Paramètres de la license initialisés");
         $this->info("Company: " . $config->company);
     }
@@ -79,40 +112,47 @@ class AppInstallCommand extends Command
     public function installModules($license)
     {
         $this->line("Initialisation des modules saas");
-        $moduleSaas = $license['product']['included_modules'];
-
-        foreach ($moduleSaas as $module) {
-            $this->line("Installation du module " . $module['name']);
-            $module = Module::updateOrCreate(
-                ['saas_module_id' => $module['id']],
+        $moduleSaas = $license['product']['included_modules'] ?? [];
+        if (empty($moduleSaas)) {
+            $this->info("Aucun module à installer");
+            return;
+        }
+        foreach ($moduleSaas as $moduleData) {
+            $this->line("Installation du module " . $moduleData['name']);
+            $createdModule = Module::updateOrCreate(
+                ['saas_module_id' => $moduleData['id']],
                 [
-                    "name" => $module['name'],
-                    "slug" => $module['key'],
-                    "description" => $module['description'],
+                    "name" => $moduleData['name'],
+                    "slug" => $moduleData['key'],
+                    "description" => $moduleData['description'],
                     "is_activable" => true,
                     "active" => false,
                 ]
             );
-            $this->line("Module " . $module['name'] . " installé");
+            $this->line("Module " . $createdModule->name . " installé");
         }
     }
 
     public function installOptions($license)
     {
         $this->line("Initialisation des options de la license");
-        $options = $license['options'];
+        $options = $license['options'] ?? [];
         $this->line("Nombre d'options: " . count($options));
+        if (empty($options)) {
+            $this->info("Aucune option à installer");
+            return;
+        }
         foreach ($options as $option) {
             $this->line("Installation de l'option " . $option['name']);
             Option::updateOrCreate(
                 ["saas_option_id" => $option['id']],
                 [
-                    "name" => $option['name'],
-                    "slug" => $option['key'],
+                    "name"        => $option['name'],
+                    "slug"        => $option['key'],
                     "description" => $option['description'],
-                    "is_enabled" => $option['pivot']['enabled'],
-                    "expires_at" => $option['pivot']['expires_at'],
-                    "active" => false,
+                    "is_enabled"  => $option['pivot']['enabled']  ?? false,
+                    "expires_at"  => $option['pivot']['expires_at'] ?? null,
+                    "active"      => false,
                     "saas_option_id" => $option['id'],
                 ]
             );

@@ -4,6 +4,9 @@ use App\Models\Module\Core\Module;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 it('uses the HasFactory trait', function () {
+    /**
+     * @runInSeparateProcess
+     */
     $uses = class_uses(Module::class);
     expect($uses)->toContain(HasFactory::class);
 });

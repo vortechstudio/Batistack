@@ -18,6 +18,7 @@ class ModuleFactory extends Factory
     {
         return [
             'name' => $this->faker->name,
+            'slug' => $this->faker->slug,
             'description' => $this->faker->sentence,
             'saas_module_id' => $this->faker->numberBetween(1, 100),
             'is_activable' => $this->faker->boolean,

@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('options', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('slug');
-            $table->text('description');
-            $table->boolean('is_enabled');
-            $table->date('expires_at');
-            $table->boolean('active');
-            $table->integer('saas_option_id');
+            $table->string('slug')->unique();
+            $table->text('description')->nullable();
+            $table->boolean('is_enabled')->default(false);
+            $table->date('expires_at')->nullable()->index();
+            $table->boolean('active')->default(false);
+            $table->unsignedBigInteger('saas_option_id')->nullable()->index();
             $table->timestamps();
         });
     }
