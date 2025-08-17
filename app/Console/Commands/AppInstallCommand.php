@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Module\Core\Module;
+use App\Models\Module\Core\Option;
 use App\Models\Module\Core\Setting;
 use App\Services\Batistack;
 use Illuminate\Console\Command;
@@ -36,6 +37,7 @@ class AppInstallCommand extends Command
             $this->verificationParametre($infoLicense);
             $this->initializeSettings($infoLicense);
             $this->installModules($infoLicense);
+            $this->installOptions($infoLicense);
         }
     }
 
@@ -99,9 +101,22 @@ class AppInstallCommand extends Command
     {
         $this->line("Initialisation des options de la license");
         $options = $license['options'];
-
+        $this->line("Nombre d'options: " . count($options));
         foreach ($options as $option) {
             $this->line("Installation de l'option " . $option['name']);
+            Option::updateOrCreate(
+                ["saas_option_id" => $option['id']],
+                [
+                    "name" => $option['name'],
+                    "slug" => $option['key'],
+                    "description" => $option['description'],
+                    "is_enabled" => $option['pivot']['enabled'],
+                    "expires_at" => $option['pivot']['expires_at'],
+                    "active" => false,
+                    "saas_option_id" => $option['id'],
+                ]
+            );
+            $this->line("Option " . $option['name'] . " installée");
         }
     }
 }
