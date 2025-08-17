@@ -1,4 +1,4 @@
-name "Validation de pull request"
+name: "Validation de pull request"
 on: [pull_request]
 
 jobs:
