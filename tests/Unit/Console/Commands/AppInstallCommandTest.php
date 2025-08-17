@@ -34,6 +34,10 @@ beforeEach(function () {
     $outputProperty->setValue($this->command, $this->output);
 });
 
+afterEach(function () {
+    \Mockery::close();
+});
+
 it('can be instantiated', function () {
     expect($this->command)->toBeInstanceOf(AppInstallCommand::class);
 });
