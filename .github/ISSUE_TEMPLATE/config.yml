@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a question
+    url: https://github.com/vortechstudio/Batistack/discussions/new?category=q-a
+    about: Ask the community for help
+  - name: Request a feature
+    url: https://github.com/vortechstudio/Batistack/discussions/new?category=ideas
+    about: Share ideas for new features
+  - name: Report a security issue
+    url: https://github.com/vortechstudio/Batistack/security/policy
+    about: Learn how to notify us for sensitive bugs
