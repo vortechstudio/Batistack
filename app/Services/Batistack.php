@@ -26,7 +26,6 @@ class Batistack
             return $response;
         } catch (Exception $e) {
             Log::error('API GET error: ' . $e->getMessage());
-            // Retourner une réponse avec un statut 500 en cas d'erreur
             return new \Illuminate\Http\Client\Response(new \GuzzleHttp\Psr7\Response(500), [], null);
         }
     }
