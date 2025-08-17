@@ -1,7 +1,7 @@
 name: "Module: Core"
 description: "Issue liée au module Core"
 title: "[Core] "
-labels: ['module:core']
+labels: ['module:core', 'triage']
 assignees: ''
 body:
   - type: markdown

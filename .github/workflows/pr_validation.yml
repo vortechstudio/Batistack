@@ -1,0 +1,16 @@
+name "Validation de pull request"
+on: [pull_request]
+
+jobs:
+  checklist-verification:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR Template
+        uses: mshick/add-pr-comment@v2
+        with:
+          message: |
+            ### ⚠️ Vérification du template PR
+            - [ ] Tous les modules concernés sont cochés
+            - [ ] La checklist est complétée
+            - [ ] Les issues liées sont référencées
+          allow-repeats: false
