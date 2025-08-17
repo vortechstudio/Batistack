@@ -23,10 +23,11 @@ class Batistack
             $response = Http::withoutVerifying()
                 ->get($url, $data);
 
-            return $response->json();
+            return $response;
         } catch (Exception $e) {
             Log::error('API GET error: ' . $e->getMessage());
-            return $e->getMessage();
+            // Retourner une réponse avec un statut 500 en cas d'erreur
+            return new \Illuminate\Http\Client\Response(new \GuzzleHttp\Psr7\Response(500), [], null);
         }
     }
 
@@ -38,10 +39,10 @@ class Batistack
             $response = Http::withoutVerifying()
                 ->post($url, $data);
 
-            return $response->json();
+            return $response;
         } catch (Exception $e) {
             Log::error('API POST error: ' . $e->getMessage());
-            return $e->getMessage();
+            return new \Illuminate\Http\Client\Response(new \GuzzleHttp\Psr7\Response(500), [], null);
         }
     }
 
@@ -53,10 +54,10 @@ class Batistack
             $response = Http::withoutVerifying()
                 ->put($url, $data);
 
-            return $response->json();
+            return $response;
         } catch (Exception $e) {
             Log::error('API PUT error: ' . $e->getMessage());
-            return $e->getMessage();
+            return new \Illuminate\Http\Client\Response(new \GuzzleHttp\Psr7\Response(500), [], null);
         }
     }
 
@@ -68,10 +69,10 @@ class Batistack
             $response = Http::withoutVerifying()
                 ->delete($url, $data);
 
-            return $response->json();
+            return $response;
         } catch (Exception $e) {
             Log::error('API DELETE error: ' . $e->getMessage());
-            return $e->getMessage();
+            return new \Illuminate\Http\Client\Response(new \GuzzleHttp\Psr7\Response(500), [], null);
         }
     }
 }
