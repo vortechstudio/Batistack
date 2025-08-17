@@ -19,12 +19,6 @@ jobs:
         if: ${{ !github.event.pull_request.draft && !github.event.pull_request.head.repo.fork }}
         with:
           script: |
-            // Skip if token doesn't have write permissions
-            if (!github.tokenPermissions || !github.tokenPermissions.pull_requests.includes('write')) {
-              console.log('Skipping review - token lacks write permissions');
-              return;
-            }
-
             const { data: files } = await github.rest.pulls.listFiles({
               owner: context.payload.pull_request.head.repo.owner.login,
               repo: context.payload.pull_request.head.repo.name,
