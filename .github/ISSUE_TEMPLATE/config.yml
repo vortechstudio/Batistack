@@ -11,12 +11,12 @@ templates:
   - name: "🐛 Bug Report"
     description: "Signaler un problème technique"
     labels: ['bug']
-    body: "bug_report.md"
+    body: "bug_report.yml"
 
   - name: "✨ Feature Request"
     description: "Proposer une nouvelle fonctionnalité"
     labels: ['feature']
-    body: "feature_request.md"
+    body: "feature_request.yml"
 
   - name: "Module: Core"
     description: "Issue liée au module Core"
