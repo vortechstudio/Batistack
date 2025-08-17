@@ -94,4 +94,14 @@ class AppInstallCommand extends Command
             $this->line("Module " . $module['name'] . " installé");
         }
     }
+
+    public function installOptions($license)
+    {
+        $this->line("Initialisation des options de la license");
+        $options = $license['options'];
+
+        foreach ($options as $option) {
+            $this->line("Installation de l'option " . $option['name']);
+        }
+    }
 }
