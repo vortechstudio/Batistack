@@ -1,0 +1,80 @@
+name: "Bug Report"
+description: "Signaler un problème ou un comportement inattendu."
+title: "[BUG]: "
+labels: ["bug", "triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |-
+        Merci de prendre le temps de remplir ce rapport de bug.
+  - type: input
+    id: contact
+    attributes:
+      label: "Contact Details"
+      description: "Comment pouvons-nous vous contacter si nous avons besoin de plus d'informations ?"
+      placeholder: "email@example.com"
+    validations:
+      required: false
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: "Ce qui s'est passé"
+      description: "Décrivez clairement et succinctement le bug. Que faisiez-vous ? Quel était le comportement attendu ? Quel a été le comportement réel ?"
+      placeholder: "Expliquez ce que vous avez vu !"
+      rows: 5
+    validations:
+      required: true
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: "Étapes pour reproduire"
+      description: "Décrivez les étapes nécessaires pour reproduire le comportement. Veuillez être aussi précis que possible."
+      placeholder: "1. ...\n2. ...\n3. ..."
+      rows: 5
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: "Comportement attendu"
+      description: "Décrivez ce que vous vous attendiez à voir."
+      rows: 3
+    validations:
+      required: true
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: "Comportement actuel"
+      description: "Décrivez ce que vous avez réellement vu."
+      rows: 3
+    validations:
+      required: true
+  - type: dropdown
+    id: browser
+    attributes:
+      label: "Navigateur"
+      multiple: true
+      options:
+        - "Firefox"
+        - "Chrome"
+        - "Safari"
+        - "Edge"
+        - "Autre"
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "Captures d'écran"
+      description: "Si applicable, ajoutez des captures d'écran pour aider à expliquer votre problème."
+      placeholder: "Glissez-déposez ou collez des images ici."
+    validations:
+      required: false
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: "Contexte additionnel"
+      description: "Ajoutez tout autre contexte sur le problème ici."
+    validations:
+      required: false

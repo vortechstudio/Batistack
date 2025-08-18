@@ -1,0 +1,51 @@
+name: "Feature Request"
+description: "Suggérer une nouvelle fonctionnalité ou une amélioration."
+title: "[FEATURE]: "
+labels: ["feature", "enhancement", "triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |-
+        Merci de prendre le temps de suggérer une nouvelle fonctionnalité.
+  - type: input
+    id: contact
+    attributes:
+      label: "Contact Details"
+      description: "Comment pouvons-nous vous contacter si nous avons besoin de plus d'informations ?"
+      placeholder: "email@example.com"
+    validations:
+      required: false
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: "Description de la fonctionnalité"
+      description: "Décrivez clairement et succinctement la fonctionnalité que vous souhaitez voir ajoutée ou améliorée."
+      placeholder: "Expliquez la fonctionnalité !"
+      rows: 5
+    validations:
+      required: true
+  - type: textarea
+    id: problem-solved
+    attributes:
+      label: "Problème que cela résout"
+      description: "Quel problème cette fonctionnalité résoudrait-elle ? Ou quelle amélioration apporterait-elle ?"
+      placeholder: "Décrivez le problème actuel ou le cas d'utilisation."
+      rows: 3
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "Alternatives envisagées"
+      description: "Avez-vous envisagé des solutions ou des approches alternatives ?"
+      rows: 3
+    validations:
+      required: false
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: "Contexte additionnel"
+      description: "Ajoutez tout autre contexte ou des captures d'écran ici."
+    validations:
+      required: false

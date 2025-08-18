@@ -1,0 +1,37 @@
+name: "Triage d'issues"
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: write
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Assigner l'étiquette 'triage'"
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const moduleLabels = context.payload.issue.body.match(/module:[\w-]+/g);
+            if (moduleLabels) {
+              github.rest.issues.addLabels({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: moduleLabels
+              })
+            }
+      - name: "Commenter l'issue"
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "Merci pour votre contribution ! Nous allons examiner cette issue dans les délais."
+            })
