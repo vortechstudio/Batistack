@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Assigner l'étiquette 'triage'"
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const moduleLabels = context.payload.issue.body.match(/module:[\w-]+/g);
@@ -26,7 +26,7 @@ jobs:
               })
             }
       - name: "Commenter l'issue"
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             github.rest.issues.createComment({
