@@ -419,3 +419,61 @@ it('displays installation messages for options', function () {
     $this->assertStringContainsString('Installation de l\'option Test Option 2', $output);
     $this->assertStringContainsString('Option Test Option 2 installée', $output);
 })->skip('Skipped to avoid global mock conflicts');
+
+it('installs modules with real database', function () {
+    $licenseData = [
+        'product' => [
+            'included_modules' => [
+                [
+                    'id' => 1,
+                    'name' => 'Test Module',
+                    'key' => 'test-module',
+                    'description' => 'Test module description'
+                ]
+            ]
+        ]
+    ];
+
+    $reflection = new \ReflectionClass($this->command);
+    $method = $reflection->getMethod('installModules');
+    $method->setAccessible(true);
+
+    $method->invoke($this->command, $licenseData);
+
+    // Vérifier que le module a été créé en base
+    $this->assertDatabaseHas('modules', [
+        'saas_module_id' => 1,
+        'name' => 'Test Module',
+        'slug' => 'test-module'
+    ]);
+});
+
+it('installs options with real database', function () {
+    $licenseData = [
+        'options' => [
+            [
+                'id' => 1,
+                'name' => 'Test Option',
+                'key' => 'test-option',
+                'description' => 'Test option description',
+                'pivot' => [
+                    'enabled' => true,
+                    'expires_at' => '2024-12-31'
+                ]
+            ]
+        ]
+    ];
+
+    $reflection = new \ReflectionClass($this->command);
+    $method = $reflection->getMethod('installOptions');
+    $method->setAccessible(true);
+
+    $method->invoke($this->command, $licenseData);
+
+    // Vérifier que l'option a été créée en base
+    $this->assertDatabaseHas('options', [
+        'saas_option_id' => 1,
+        'name' => 'Test Option',
+        'slug' => 'test-option'
+    ]);
+});
