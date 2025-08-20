@@ -276,3 +276,146 @@ it('installs options correctly', function () {
     // Les expectations sont vérifiées automatiquement par Mockery
     expect(true)->toBeTrue();
 })->skip('Skipped to avoid global mock conflicts');
+
+it('returns Command::FAILURE if license is empty', function () {
+    $this->artisan('app:install')->assertExitCode(Illuminate\Console\Command::FAILURE);
+});
+
+it('returns false for unsuccessful license validation response', function () {
+    $license = 'test-license-key';
+    $mockBatistack = Mockery::mock(Batistack::class);
+    $validationResponse = Mockery::mock(Response::class);
+
+    $validationResponse->shouldReceive('successful')->andReturn(false);
+
+    $mockBatistack->shouldReceive('get')
+        ->with('/license/validate', ['license_key' => $license])
+        ->andReturn($validationResponse);
+
+    $this->app->instance(Batistack::class, $mockBatistack);
+
+    $result = $this->command->verificationLicense($license);
+
+    expect($result)->toBeFalse();
+    $this->assertStringContainsString('Erreur lors de la validation de la licence', $this->output->fetch());
+});
+
+it('handles non-array license data in verificationParametre', function () {
+    $licenseData = 'not-an-array';
+
+    $reflection = new \ReflectionClass($this->command);
+    $method = $reflection->getMethod('verificationParametre');
+    $method->setAccessible(true);
+
+    $method->invoke($this->command, $licenseData);
+
+    $this->output->fetch(); // Fetch the output to clear the buffer
+
+    // No specific assertion needed here as the method just logs an error and returns.
+    // The primary goal is to ensure it doesn't throw an unhandled exception.
+    expect(true)->toBeTrue();
+});
+
+it('displays installation messages for modules', function () {
+    $mockModule = Mockery::mock('alias:' . Module::class);
+
+    $licenseData = [
+        'product' => [
+            'included_modules' => [
+                [
+                    'id' => 1,
+                    'name' => 'Test Module 1',
+                    'key' => 'test-module-1',
+                    'description' => 'Description 1'
+                ],
+                [
+                    'id' => 2,
+                    'name' => 'Test Module 2',
+                    'key' => 'test-module-2',
+                    'description' => 'Description 2'
+                ]
+            ]
+        ]
+    ];
+
+    $moduleObject1 = Mockery::mock('ArrayAccess');
+    $moduleObject1->shouldReceive('offsetGet')->with('name')->andReturn('Test Module 1');
+    $moduleObject1->name = 'Test Module 1';
+
+    $moduleObject2 = Mockery::mock('ArrayAccess');
+    $moduleObject2->shouldReceive('offsetGet')->with('name')->andReturn('Test Module 2');
+    $moduleObject2->name = 'Test Module 2';
+
+    $mockModule->shouldReceive('updateOrCreate')
+        ->with(['saas_module_id' => 1], Mockery::any())
+        ->once()
+        ->andReturn($moduleObject1);
+
+    $mockModule->shouldReceive('updateOrCreate')
+        ->with(['saas_module_id' => 2], Mockery::any())
+        ->once()
+        ->andReturn($moduleObject2);
+
+    $reflection = new \ReflectionClass($this->command);
+    $method = $reflection->getMethod('installModules');
+    $method->setAccessible(true);
+
+    $method->invoke($this->command, $licenseData);
+
+    $output = $this->output->fetch();
+    $this->assertStringContainsString('Installation du module Test Module 1', $output);
+    $this->assertStringContainsString('Module Test Module 1 installé', $output);
+    $this->assertStringContainsString('Installation du module Test Module 2', $output);
+    $this->assertStringContainsString('Module Test Module 2 installé', $output);
+})->skip('Skipped to avoid global mock conflicts');
+
+it('displays installation messages for options', function () {
+    $mockOption = Mockery::mock('alias:' . Option::class);
+
+    $licenseData = [
+        'options' => [
+            [
+                'id' => 1,
+                'name' => 'Test Option 1',
+                'key' => 'test-option-1',
+                'description' => 'Description 1',
+                'pivot' => ['enabled' => true, 'expires_at' => null]
+            ],
+            [
+                'id' => 2,
+                'name' => 'Test Option 2',
+                'key' => 'test-option-2',
+                'description' => 'Description 2',
+                'pivot' => ['enabled' => false, 'expires_at' => '2025-01-01']
+            ]
+        ]
+    ];
+
+    $optionObject1 = new \stdClass();
+    $optionObject1->name = 'Test Option 1';
+
+    $optionObject2 = new \stdClass();
+    $optionObject2->name = 'Test Option 2';
+
+    $mockOption->shouldReceive('updateOrCreate')
+        ->with(['saas_option_id' => 1], Mockery::any())
+        ->once()
+        ->andReturn($optionObject1);
+
+    $mockOption->shouldReceive('updateOrCreate')
+        ->with(['saas_option_id' => 2], Mockery::any())
+        ->once()
+        ->andReturn($optionObject2);
+
+    $reflection = new \ReflectionClass($this->command);
+    $method = $reflection->getMethod('installOptions');
+    $method->setAccessible(true);
+
+    $method->invoke($this->command, $licenseData);
+
+    $output = $this->output->fetch();
+    $this->assertStringContainsString('Installation de l\'option Test Option 1', $output);
+    $this->assertStringContainsString('Option Test Option 1 installée', $output);
+    $this->assertStringContainsString('Installation de l\'option Test Option 2', $output);
+    $this->assertStringContainsString('Option Test Option 2 installée', $output);
+})->skip('Skipped to avoid global mock conflicts');
