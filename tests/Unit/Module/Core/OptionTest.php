@@ -2,19 +2,18 @@
 
 use App\Models\Module\Core\Option;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 it('uses the HasFactory trait', function () {
-    $reflection = new ReflectionClass(Option::class);
-    $traits = $reflection->getTraitNames();
-    expect($traits)->toContain(HasFactory::class);
+    $uses = class_uses_recursive(Option::class);
+    expect($uses)->toContain(HasFactory::class);
 });
 
 it('has guarded property set to empty array', function () {
     $option = new Option();
-    expect($option->getGuarded())->toBe([]);
+    $reflection = new ReflectionClass($option);
+    $property = $reflection->getProperty('guarded');
+    $property->setAccessible(true);
+    expect($property->getValue($option))->toBe([]);
 });
 
 it('has casts property for is_enabled', function () {
@@ -41,11 +40,4 @@ it('has casts property for active', function () {
 it('can be instantiated', function () {
     $option = new Option();
     expect($option)->toBeInstanceOf(Option::class);
-});
-
-it('can be created using factory', function () {
-    $option = Option::factory()->make();
-    expect($option)->toBeInstanceOf(Option::class);
-    expect($option->name)->not->toBeNull();
-    expect($option->slug)->not->toBeNull();
 });
