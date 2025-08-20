@@ -26,15 +26,30 @@ jobs:
             });
 
             // Vérifications automatiques
-            const hasTests = files.some(f => f.filename.includes('test'));
-            const hasMigrations = files.some(f => f.filename.includes('migration'));
+            const testFilePatterns = [
+              /^tests\/(Unit|Feature)\/.*Test\.php$/,
+              /^tests\/Pest\.php$/,
+              /^tests\/TestCase\.php$/
+            ];
+            const hasTests = files.some(f => testFilePatterns.some(pattern => pattern.test(f.filename)));
+            const hasMigrations = files.some(f => f.filename.startsWith('database/migrations/') && f.filename.endsWith('.php'));
 
             if (!hasTests && files.length > 5) {
               await github.rest.pulls.createReview({
                 owner: context.payload.pull_request.base.repo.owner.login,
                 repo: context.payload.pull_request.base.repo.name,
                 pull_number: context.issue.number,
-                body: '⚠️ Cette PR semble importante mais ne contient pas de tests.',
+                body: '⚠️ Cette PR semble importante mais ne contient pas de tests ou les tests ne sont pas dans les dossiers attendus (tests/Unit, tests/Feature).',
                 event: 'REQUEST_CHANGES'
+              });
+            }
+
+            if (hasMigrations) {
+              await github.rest.pulls.createReview({
+                owner: context.payload.pull_request.base.repo.owner.login,
+                repo: context.payload.pull_request.base.repo.name,
+                pull_number: context.issue.number,
+                body: '⚠️ Cette PR contient des migrations. Veuillez vous assurer que les migrations sont correctement testées et documentées.',
+                event: 'COMMENT'
               });
             }
