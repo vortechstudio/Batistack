@@ -105,13 +105,15 @@ jobs:
           php artisan migrate --force
           ./vendor/bin/pest --coverage --coverage-clover=reports/metrics/coverage.xml --coverage-html=reports/metrics/coverage
 
+      - name: 🧪 Run tests with coverage (codecov jest)
+        run: |
+          npx jest --coverage
+
       - name: ⬆️ Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./reports/metrics/coverage.xml
-          flags: unittests
-          name: codecov-umbrella
+          slug: vortechstudio/Batistack
           fail_ci_if_error: true
           verbose: true
 
