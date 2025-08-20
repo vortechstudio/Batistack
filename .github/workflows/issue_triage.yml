@@ -25,6 +25,30 @@ jobs:
                 labels: moduleLabels
               })
             }
+
+      - name: "Vérifier le template d'issue"
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const requiredSections = ['Description', 'Steps to reproduce'];
+            const issueBody = context.payload.issue.body;
+            let missingSections = [];
+
+            for (const section of requiredSections) {
+              if (!issueBody.includes(`### ${section}`)) {
+                missingSections.push(section);
+              }
+            }
+
+            if (missingSections.length > 0) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `⚠️ Sections manquantes dans l'issue : ${missingSections.join(', ')}.\n\nMerci de compléter ces sections selon le template.`
+              });
+            }
+
       - name: "Commenter l'issue"
         uses: actions/github-script@v7
         with:
@@ -35,3 +59,11 @@ jobs:
               repo: context.repo.repo,
               body: "Merci pour votre contribution ! Nous allons examiner cette issue dans les délais."
             })
+
+      - name: "Notifier les issues critiques"
+        if: contains(github.event.issue.labels.*.name, 'priority:critical')
+        uses: slackapi/slack-github-action@v1
+        with:
+          slack-message: "Nouvelle issue critique : ${{ github.event.issue.html_url }}"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
