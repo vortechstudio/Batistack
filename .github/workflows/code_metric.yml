@@ -9,6 +9,24 @@ on:
     branches: [ master ]
   schedule:
     - cron: '0 0 * * 0' # Every Sunday at midnight
+  workflow_dispatch:
+    inputs:
+      max_violations:
+        description: 'Maximum allowed PHPStan violations'
+        required: false
+        default: '10'
+      max_complexity:
+        description: 'Maximum allowed average complexity score'
+        required: false
+        default: '10'
+      slack_notification:
+        description: 'Send Slack notification (true/false)'
+        required: false
+        default: 'false'
+      create_issue:
+        description: 'Create GitHub issue on failure (true/false)'
+        required: false
+        default: 'true'
 
 env:
   PHP_VERSION: '8.3'
@@ -53,7 +71,10 @@ jobs:
       - name: 📦 Install dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
 
-      - name: 📦 Install dependencies
+      - name: 📝 Validate composer.json
+        run: composer validate --strict
+
+      - name: 📦 Install NPM dependencies
         run: npm install
 
       - name: 🔧 Build assets
@@ -84,6 +105,16 @@ jobs:
           php artisan migrate --force
           ./vendor/bin/pest --coverage --coverage-clover=reports/metrics/coverage.xml --coverage-html=reports/metrics/coverage
 
+      - name: ⬆️ Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./reports/metrics/coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
+          verbose: true
+
       - name: 🎨 Check code style
         run: |
           ./vendor/bin/pint --test > reports/metrics/pint.txt || echo "Style issues detected"
@@ -98,6 +129,10 @@ jobs:
           COVERAGE_SCORE=0
           VIOLATIONS_COUNT=0
 
+          # Récupérer les seuils depuis les inputs ou utiliser les valeurs par défaut
+          MAX_VIOLATIONS=${{ github.event.inputs.max_violations || '10' }}
+          MAX_COMPLEXITY=${{ github.event.inputs.max_complexity || '10' }}
+
           # Analyser PHPMetrics (si le fichier JSON existe)
           if [ -f "reports/metrics/metrics.json" ]; then
             # Extraire les métriques principales (approximation)
@@ -111,8 +146,7 @@ jobs:
           fi
 
           # Définir les seuils de qualité
-          MAX_VIOLATIONS=10
-          MAX_COMPLEXITY=10
+          # MAX_VIOLATIONS et MAX_COMPLEXITY sont maintenant récupérés depuis les inputs du workflow
 
           # Vérifier les seuils
           echo "📊 Métriques de qualité:"
@@ -200,102 +234,40 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const title = `🚨 Quality Gate Failed - ${new Date().toISOString().split('T')[0]}`;
-            const body = `## 🚫 Quality Gate Failure
+            const issueTitle = `Quality Gate Failed for ${{ github.ref_name }}`;
+            const issueBody = `The Quality Gate check failed for the latest push/PR on branch \`${{ github.ref_name }}\`.
 
-            Le workflow de métriques de code a échoué sur la branche `${{ github.ref_name }}`.
+            **Workflow Run**: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
-            ### 📊 Métriques
-            - **Violations PHPStan**: ${{ needs.quality-gate.outputs.violations-count }}
-            - **Complexité**: ${{ needs.quality-gate.outputs.complexity-score }}
+            **Metrics**:
+            - Violations: ${{ needs.quality-gate.outputs.violations-count }}
+            - Complexity: ${{ needs.quality-gate.outputs.complexity-score }}
+            - Maintainability: ${{ needs.quality-gate.outputs.maintainability-score }}
 
-            ### 🔗 Liens
-            - [Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            - [Commit](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
-
-            ### 📋 Actions Requires
-            - [ ] Corriger les violations PHPStan
-            - [ ] Réduire la complexité du code
-            - [ ] Relancer le workflow après corrections
-
-            ---
-            *Issue créée automatiquement par le workflow Code Metrics*`;
+            Please review the code and address the quality issues.`;
 
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: title,
-              body: body,
-              labels: ['quality', 'metrics', 'bug']
+              title: issueTitle,
+              body: issueBody,
+              labels: ['bug', 'quality-gate-failure']
             });
 
-      - name: 📱 Send Slack notification
-        if: github.event.inputs.slack_notification == 'true' || needs.quality-gate.outputs.quality-status == 'failed'
-        uses: actions/github-script@v7
-        with:
-           script: |
-             // Note: Nécessite la configuration d'un webhook Slack dans les secrets
-             // SLACK_WEBHOOK doit être défini dans les secrets du repository
-
-             const webhookUrl = '${{ secrets.SLACK_WEBHOOK }}';
-
-             if (!webhookUrl) {
-               console.log('⚠️ SLACK_WEBHOOK non configuré dans les secrets du repository');
-               return;
-             }
-
-             const status = '${{ needs.quality-gate.outputs.quality-status }}';
-             const violations = '${{ needs.quality-gate.outputs.violations-count }}';
-
-             const emoji = status === 'success' ? '✅' : '❌';
-             const color = status === 'success' ? 'good' : 'danger';
-
-             const message = {
-               text: `${emoji} Code Metrics - ${status.toUpperCase()}`,
-               attachments: [{
-                 color: color,
-                 fields: [
-                   {
-                     title: "Repository",
-                     value: "${{ github.repository }}",
-                     short: true
-                   },
-                   {
-                     title: "Branch",
-                     value: "${{ github.ref_name }}",
-                     short: true
-                   },
-                   {
-                     title: "Violations",
-                     value: violations,
-                     short: true
-                   }
-                 ],
-                 actions: [{
-                   type: "button",
-                   text: "View Workflow",
-                   url: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                 }]
-               }]
-             };
-
-             try {
-               const response = await fetch(webhookUrl, {
-                 method: 'POST',
-                 headers: {
-                   'Content-Type': 'application/json',
-                 },
-                 body: JSON.stringify(message)
-               });
-
-               if (response.ok) {
-                 console.log('✅ Notification Slack envoyée avec succès');
-               } else {
-                 console.log(`❌ Erreur lors de l'envoi Slack: ${response.status} ${response.statusText}`);
-               }
-             } catch (error) {
-               console.log(`❌ Erreur lors de l'envoi Slack: ${error.message}`);
-             }
+      - name: 🔔 Send Slack Notification
+        if: github.event.inputs.slack_notification == 'true' && secrets.SLACK_WEBHOOK
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_MESSAGE: |
+            *Quality Gate Status: ${{ needs.quality-gate.outputs.quality-status }}*
+            *Repo*: ${{ github.repository }}
+            *Branch*: ${{ github.ref_name }}
+            *Run*: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            *Violations*: ${{ needs.quality-gate.outputs.violations-count }}
+            *Complexity*: ${{ needs.quality-gate.outputs.complexity-score }}
+            *Maintainability*: ${{ needs.quality-gate.outputs.maintainability-score }}
+          SLACK_COLOR: ${{ needs.quality-gate.outputs.quality-status == 'success' && 'good' || 'danger' }}
 
   summary:
     name: 📋 Résumé Final
