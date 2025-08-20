@@ -9,3 +9,5 @@ parameters:
         - config
         - database
     tmpDir: build/phpstan
+    configDirectories:
+        - config

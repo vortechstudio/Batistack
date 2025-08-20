@@ -51,6 +51,36 @@ it('has correct description', function () {
     expect($this->command->getDescription())->toBe($description);
 });
 
+it('handle command', function () {
+    $license = 'valid-license-key';
+    $validationResponse = Mockery::mock(Response::class);
+    $infoResponse = Mockery::mock(Response::class);
+
+    $validationResponse->shouldReceive('successful')->andReturn(true);
+    $validationResponse->shouldReceive('json')->andReturn(['valid' => true]);
+    $infoResponse->shouldReceive('json')->andReturn([
+        'license_key' => $license,
+        'customer' => ['company_name' => 'Test Company'],
+        'status' => 'active',
+        'max_users' => 10,
+        'product' => [
+            'max_projects' => 5,
+            'storage_limit' => 1000
+        ],
+        'expires_at' => '2024-12-31'
+    ]);
+
+    $this->batistackMock->shouldReceive('get')
+        ->with('/license/validate', ['license_key' => $license])
+        ->andReturn($validationResponse);
+
+    $this->batistackMock->shouldReceive('get')
+        ->with('/license/info', ['license_key' => $license])
+        ->andReturn($infoResponse);
+
+    $this->artisan('app:install --license=valid-license-key')->assertSuccessful();
+});
+
 it('validates license successfully', function () {
     $license = 'valid-license-key';
     $mockBatistack = Mockery::mock(Batistack::class);
@@ -105,6 +135,7 @@ it('returns null for invalid license', function () {
 
     expect($result)->toBeFalse();
 });
+
 
 it('initializes settings correctly', function () {
     $mockSetting = Mockery::mock('alias:' . Setting::class);

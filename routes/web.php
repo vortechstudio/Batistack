@@ -1,5 +1,6 @@
 <?php
 
+use App\Services\Batistack;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
@@ -7,11 +8,16 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+Route::get('/test', function () {
+    $response = app(Batistack::class)->get('/health');
+    dd($response);
+});
+
 Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'api.check'])
     ->name('dashboard');
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'api.check'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
     Volt::route('settings/profile', 'settings.profile')->name('settings.profile');

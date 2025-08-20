@@ -19,3 +19,30 @@ jobs:
             - [ ] La checklist est complétée
             - [ ] Les issues liées sont référencées
           allow-repeats: false
+
+      - name: Check for Issue Reference
+        uses: mshick/add-pr-comment@v2
+        if: ${{ !contains(github.event.pull_request.body, '#') && !contains(github.event.pull_request.body, 'Closes') && !contains(github.event.pull_request.body, 'Fixes') }}
+        with:
+          message: |
+            ### ⚠️ Référence d'issue manquante
+            Il semble que cette Pull Request ne référence aucune issue. Veuillez vous assurer qu'une issue est liée (ex: #123, Closes #123, Fixes #123).
+          allow-repeats: false
+
+      - name: Checklist Verification
+        uses: mshick/add-pr-comment@v2
+        with:
+          message: |
+            ### Checklist de la Pull Request
+
+            Veuillez vous assurer que les points suivants ont été vérifiés avant de demander une relecture :
+
+            - [ ] Le code respecte les standards de codage.
+            - [ ] Les tests unitaires et/ou fonctionnels ont été ajoutés ou mis à jour pour couvrir les changements.
+            - [ ] La documentation a été mise à jour si nécessaire.
+            - [ ] Les migrations de base de données ont été testées (si applicable).
+            - [ ] **Vérification automatique des références d'issues :** Assurez-vous que la description de cette PR contient une référence à une ou plusieurs issues (ex: `Fixes #123`, `Closes #456`).
+
+            Merci de cocher chaque case une fois que vous avez vérifié le point correspondant.
+          repo-token: ${{ secrets.GH_TOKEN }}
+          repo-token-user-permission: write
