@@ -158,14 +158,14 @@ class AppInstallCommand extends Command
             // Add fallback for slug field (use 'key' if 'slug' is missing)
             $slug = $moduleData['slug'] ?? $moduleData['key'] ?? null;
 
-            // Validate that we have a valid slug
+            // Normalize slug (trim whitespace) BEFORE validation
+            $slug = trim($slug ?? '');
+
+            // Validate that we have a valid slug AFTER trimming
             if (empty($slug)) {
                 $this->error("Error: Module '" . ($moduleData['name'] ?? 'Unknown') . "' has no slug or key identifier");
                 continue;
             }
-
-            // Normalize slug (trim whitespace)
-            $slug = trim($slug);
 
             $createdModule = Module::updateOrCreate(
                 ['saas_module_id' => $moduleData['id']],

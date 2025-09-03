@@ -475,3 +475,192 @@ it('installs options with real database', function () {
         'slug' => 'test-option'
     ]);
 });
+
+// Test pour la logique de récupération du nom d'entreprise (lignes 112-114)
+it('handles company name fallback logic correctly', function () {
+    // Test avec customer.entreprise
+    $licenseData1 = [
+        'license_key' => 'test-license',
+        'customer' => ['entreprise' => 'Company from entreprise'],
+        'status' => 'active'
+    ];
+
+    $reflection = new \ReflectionClass($this->command);
+    $method = $reflection->getMethod('initializeSettings');
+    $method->setAccessible(true);
+
+    $method->invoke($this->command, $licenseData1);
+
+    $this->assertDatabaseHas('settings', [
+        'license_key' => 'test-license',
+        'company' => 'Company from entreprise'
+    ]);
+
+    // Test avec customer.company_name (fallback)
+    $licenseData2 = [
+        'license_key' => 'test-license-2',
+        'customer' => ['company_name' => 'Company from company_name'],
+        'status' => 'active'
+    ];
+
+    $method->invoke($this->command, $licenseData2);
+
+    $this->assertDatabaseHas('settings', [
+        'license_key' => 'test-license-2',
+        'company' => 'Company from company_name'
+    ]);
+
+    // Test avec license.company (dernier fallback)
+    $licenseData3 = [
+        'license_key' => 'test-license-3',
+        'company' => 'Company from root',
+        'status' => 'active'
+    ];
+
+    $method->invoke($this->command, $licenseData3);
+
+    $this->assertDatabaseHas('settings', [
+        'license_key' => 'test-license-3',
+        'company' => 'Company from root'
+    ]);
+});
+
+// Test pour la logique des métadonnées Stripe (lignes 117, 122, 125)
+it('handles stripe metadata fallback logic correctly', function () {
+    $licenseData = [
+        'license_key' => 'test-stripe-license',
+        'customer' => ['entreprise' => 'Test Company'],
+        'status' => 'active',
+        'product' => [
+            'info_stripe' => [
+                'metadata' => [
+                    'max_users' => 50,
+                    'storage_limit' => 2000
+                ]
+            ],
+            'max_projects' => 15
+        ],
+        'max_users' => 10,  // fallback value
+        'max_folders' => 5, // fallback value
+        'max_storages' => 1000 // fallback value
+    ];
+
+    $reflection = new \ReflectionClass($this->command);
+    $method = $reflection->getMethod('initializeSettings');
+    $method->setAccessible(true);
+
+    $method->invoke($this->command, $licenseData);
+
+    // Vérifier que les valeurs Stripe sont prioritaires
+    $this->assertDatabaseHas('settings', [
+        'license_key' => 'test-stripe-license',
+        'max_users' => 50,      // from stripe metadata
+        'max_folders' => 15,    // from product.max_projects
+        'max_storages' => 2000  // from stripe metadata
+    ]);
+});
+
+it('uses fallback values when stripe metadata is missing', function () {
+    $licenseData = [
+        'license_key' => 'test-fallback-license',
+        'customer' => ['entreprise' => 'Test Company'],
+        'status' => 'active',
+        'max_users' => 25,
+        'max_folders' => 8,
+        'max_storages' => 1500
+    ];
+
+    $reflection = new \ReflectionClass($this->command);
+    $method = $reflection->getMethod('initializeSettings');
+    $method->setAccessible(true);
+
+    $method->invoke($this->command, $licenseData);
+
+    // Vérifier que les valeurs de fallback sont utilisées
+    $this->assertDatabaseHas('settings', [
+        'license_key' => 'test-fallback-license',
+        'max_users' => 25,
+        'max_folders' => 8,
+        'max_storages' => 1500
+    ]);
+});
+
+// Test pour la gestion d'erreur des modules sans slug/key (ligne 163)
+it('handles modules without slug or key identifier', function () {
+    $licenseData = [
+        'product' => [
+            'features' => [
+                [
+                    'id' => 1,
+                    'name' => 'Valid Module',
+                    'slug' => 'valid-module',
+                    'description' => 'A valid module'
+                ],
+                [
+                    'id' => 2,
+                    'name' => 'Invalid Module',
+                    'description' => 'Module without slug or key'
+                    // Pas de 'slug' ni 'key'
+                ],
+                [
+                    'id' => 3,
+                    'name' => 'Module with Key',
+                    'key' => 'module-with-key',
+                    'description' => 'Module with key fallback'
+                ]
+            ]
+        ]
+    ];
+
+    $this->command->installModules($licenseData);
+
+    // Vérifier que seuls les modules valides sont créés
+    $this->assertDatabaseHas('modules', [
+        'saas_module_id' => 1,
+        'name' => 'Valid Module',
+        'slug' => 'valid-module'
+    ]);
+
+    $this->assertDatabaseHas('modules', [
+        'saas_module_id' => 3,
+        'name' => 'Module with Key',
+        'slug' => 'module-with-key'
+    ]);
+
+    // Vérifier que le module invalide n'est pas créé
+    $this->assertDatabaseMissing('modules', [
+        'saas_module_id' => 2,
+        'name' => 'Invalid Module'
+    ]);
+
+    // Vérifier que l'erreur est affichée dans l'output
+    $output = $this->output->fetch();
+    $this->assertStringContainsString("Error: Module 'Invalid Module' has no slug or key identifier", $output);
+});
+
+it('handles modules with empty slug after trimming', function () {
+    $licenseData = [
+        'product' => [
+            'features' => [
+                [
+                    'id' => 1,
+                    'name' => 'Module with Empty Slug',
+                    'slug' => '   ',  // Slug avec seulement des espaces
+                    'description' => 'Module with whitespace-only slug'
+                ]
+            ]
+        ]
+    ];
+
+    $this->command->installModules($licenseData);
+
+    // Vérifier que le module n'est pas créé
+    $this->assertDatabaseMissing('modules', [
+        'saas_module_id' => 1,
+        'name' => 'Module with Empty Slug'
+    ]);
+
+    // Vérifier que l'erreur est affichée
+    $output = $this->output->fetch();
+    $this->assertStringContainsString("Error: Module 'Module with Empty Slug' has no slug or key identifier", $output);
+});
