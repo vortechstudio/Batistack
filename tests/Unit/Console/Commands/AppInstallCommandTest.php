@@ -60,7 +60,7 @@ it('handle command', function () {
     $validationResponse->shouldReceive('json')->andReturn(['valid' => true]);
     $infoResponse->shouldReceive('json')->andReturn([
         'license_key' => $license,
-        'customer' => ['company_name' => 'Test Company'],
+        'customer' => ['entreprise' => 'Test Company'], // Changed from 'company_name' to 'entreprise'
         'status' => 'active',
         'max_users' => 10,
         'product' => [
@@ -421,26 +421,24 @@ it('displays installation messages for options', function () {
 })->skip('Skipped to avoid global mock conflicts');
 
 it('installs modules with real database', function () {
+    // Update to use current schema with product.features
     $licenseData = [
         'product' => [
-            'included_modules' => [
+            'features' => [
                 [
                     'id' => 1,
                     'name' => 'Test Module',
-                    'key' => 'test-module',
+                    'slug' => 'test-module',
                     'description' => 'Test module description'
                 ]
             ]
         ]
     ];
 
-    $reflection = new \ReflectionClass($this->command);
-    $method = $reflection->getMethod('installModules');
-    $method->setAccessible(true);
+    // Call installModules directly since it's public (remove Reflection)
+    $this->command->installModules($licenseData);
 
-    $method->invoke($this->command, $licenseData);
-
-    // Vérifier que le module a été créé en base
+    // Verify the module was created with the new slug field
     $this->assertDatabaseHas('modules', [
         'saas_module_id' => 1,
         'name' => 'Test Module',
