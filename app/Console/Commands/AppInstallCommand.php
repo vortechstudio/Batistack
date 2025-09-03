@@ -7,6 +7,7 @@ use App\Models\Module\Core\Option;
 use App\Models\Module\Core\Setting;
 use App\Services\Batistack;
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 
 class AppInstallCommand extends Command
 {
@@ -106,6 +107,13 @@ class AppInstallCommand extends Command
         // Backward-compatible license key extraction
         $licenseKey = $license['service_code'] ?? $license['license_key'] ?? null;
 
+        // Validate license key before proceeding
+        if (empty($licenseKey)) {
+            $this->error("Error: No valid license key found in license data. Please provide a valid license with either 'service_code' or 'license_key'.");
+            $this->error("Installation abortée due to missing license key.");
+            return Command::FAILURE;
+        }
+
         // Safe nested key access with fallbacks
         $company = isset($license['customer']['entreprise'])
             ? $license['customer']['entreprise']
@@ -125,7 +133,10 @@ class AppInstallCommand extends Command
             ? $license['product']['info_stripe']['metadata']['storage_limit']
             : ($license['max_storages'] ?? 0);
 
-        $expiredAt = $license['expirationDate'] ?? $license['expired_at'] ?? null;
+        $expiredAt = $license['expirationDate']
+            ?? $license['expires_at']
+            ?? $license['expired_at']
+            ?? null;
 
         $config = Setting::updateOrCreate(
             ["license_key" => $licenseKey],
@@ -141,27 +152,35 @@ class AppInstallCommand extends Command
         );
         $this->info("Paramètres de la license initialisés");
         $this->info("Entreprise: " . $config->company);
+
+        return Command::SUCCESS;
     }
 
     public function installModules($license)
     {
         $this->line("Initialisation des modules saas");
         // Add fallback to included_modules for backward compatibility
-        $moduleSaas = $license['product']['features'] ?? $license['included_modules'] ?? [];
+        $moduleSaas = $license['product']['features'] ?? $license['product']['included_modules'] ?? $license['included_modules'] ?? [];
         if (empty($moduleSaas)) {
             $this->info("Aucun module à installer");
             return;
         }
         foreach ($moduleSaas as $moduleData) {
+            // Check if module ID exists to avoid undefined index errors
+            if (!isset($moduleData['id'])) {
+                $this->error("Error: Module '" . ($moduleData['name'] ?? 'Unknown') . "' has no ID identifier");
+                continue;
+            }
+
             $this->line("Installation du module " . $moduleData['name']);
 
             // Add fallback for slug field (use 'key' if 'slug' is missing)
             $slug = $moduleData['slug'] ?? $moduleData['key'] ?? null;
 
-            // Normalize slug (trim whitespace) BEFORE validation
-            $slug = trim($slug ?? '');
+            // Normalize slug using Str::slug() for consistent formatting
+            $slug = Str::slug($slug ?? '');
 
-            // Validate that we have a valid slug AFTER trimming
+            // Validate that we have a valid slug AFTER normalization
             if (empty($slug)) {
                 $this->error("Error: Module '" . ($moduleData['name'] ?? 'Unknown') . "' has no slug or key identifier");
                 continue;
@@ -191,12 +210,22 @@ class AppInstallCommand extends Command
             return;
         }
         foreach ($options as $option) {
+            // Check if option ID exists to avoid undefined index errors
+            if (!isset($option['id'])) {
+                $this->error("Error: Option '" . ($option['name'] ?? 'Unknown') . "' has no ID identifier");
+                continue;
+            }
+
             $this->line("Installation de l'option " . $option['name']);
+
+            // Normalize the slug using Str::slug() for consistency
+            $optionSlug = Str::slug($option['key'] ?? '');
+
             Option::updateOrCreate(
                 ["saas_option_id" => $option['id']],
                 [
                     "name"        => $option['name'],
-                    "slug"        => $option['key'],
+                    "slug"        => $optionSlug,
                     "description" => $option['description'],
                     "is_enabled"  => $option['pivot']['enabled']  ?? false,
                     "expires_at"  => $option['pivot']['expires_at'] ?? null,
