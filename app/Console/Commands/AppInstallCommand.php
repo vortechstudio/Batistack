@@ -70,6 +70,7 @@ class AppInstallCommand extends Command
 
     public function verificationParametre($license)
     {
+        //dd($license);
         if (!is_array($license)) {
             $this->error("Invalid license data provided to verificationParametre.");
             return;
@@ -77,15 +78,15 @@ class AppInstallCommand extends Command
 
         $productName = $license['product']['name'] ?? 'unknown product';
         $domain = $license['domain'] ?? 'unknown domain';
-        $maxUsers = $license['max_users'] ?? 0;
-        $maxProjects = $license['product']['max_projects'] ?? 0;
+        $maxUsers = $license['product']['info_stripe']['metadata']['max_users'] ?? 0;
+        $maxStorage = $license['product']['info_stripe']['metadata']['storage_limit'] ?? 0;
 
         $this->info("Produit: " . $productName);
         $this->info("Parametre de la license: License attribué à " . $domain);
         $this->info("Parametre de la license: License Max Users " . $maxUsers);
-        $this->info("Parametre de la license: License Max Folders " . $maxProjects);
+        $this->info("Parametre de la license: License Limit Storage " . $maxStorage);
 
-        if ($productName === 'unknown product' || $domain === 'unknown domain' || $maxUsers === 0 || $maxProjects === 0) {
+        if ($productName === 'unknown product' || $domain === 'unknown domain' || $maxUsers === 0 || $maxStorage === 0) {
             $this->warn("Warning: Some critical license parameters are missing or invalid.");
         }
     }
@@ -94,25 +95,25 @@ class AppInstallCommand extends Command
     {
         $this->line("Initialisation des paramètres de la license");
         $config = Setting::updateOrCreate(
-            ["license_key" => $license['license_key']],
+            ["license_key" => $license['service_code']],
             [
-                "company"      => $license['customer']['company_name']    ?? null,
-                "license_key"  => $license['license_key'],
+                "company"      => $license['customer']['entreprise']    ?? null,
+                "license_key"  => $license['service_code'],
                 "status"       => $license['status']                      ?? null,
-                "max_users"    => $license['max_users']                   ?? 0,
-                "max_folders"  => $license['product']['max_projects']     ?? 0,
-                "max_storages" => $license['product']['storage_limit']    ?? 0,
-                "expired_at"   => $license['expires_at']                  ?? null,
+                "max_users"    => $license['product']['info_stripe']['metadata']['max_users']                   ?? 0,
+                "max_folders"  => $license['product']['max_projects']     ?? 1,
+                "max_storages" => $license['product']['info_stripe']['metadata']['storage_limit']    ?? 0,
+                "expired_at"   => $license['expirationDate']                  ?? null,
             ]
         );
         $this->info("Paramètres de la license initialisés");
-        $this->info("Company: " . $config->company);
+        $this->info("Entreprise: " . $config->company);
     }
 
     public function installModules($license)
     {
         $this->line("Initialisation des modules saas");
-        $moduleSaas = $license['product']['included_modules'] ?? [];
+        $moduleSaas = $license['product']['features'] ?? [];
         if (empty($moduleSaas)) {
             $this->info("Aucun module à installer");
             return;
@@ -123,7 +124,7 @@ class AppInstallCommand extends Command
                 ['saas_module_id' => $moduleData['id']],
                 [
                     "name" => $moduleData['name'],
-                    "slug" => $moduleData['key'],
+                    "slug" => $moduleData['slug'],
                     "description" => $moduleData['description'],
                     "is_activable" => true,
                     "active" => false,
