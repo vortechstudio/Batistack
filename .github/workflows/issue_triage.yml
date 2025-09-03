@@ -62,7 +62,7 @@ jobs:
 
       - name: "Notifier les issues critiques"
         if: contains(github.event.issue.labels.*.name, 'priority:critical')
-        uses: slackapi/slack-github-action@v1
+        uses: slackapi/slack-github-action@v2
         with:
           slack-message: "Nouvelle issue critique : ${{ github.event.issue.html_url }}"
         env:

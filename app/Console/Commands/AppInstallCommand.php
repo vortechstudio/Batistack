@@ -7,6 +7,7 @@ use App\Models\Module\Core\Option;
 use App\Models\Module\Core\Setting;
 use App\Services\Batistack;
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 
 class AppInstallCommand extends Command
 {
@@ -70,6 +71,7 @@ class AppInstallCommand extends Command
 
     public function verificationParametre($license)
     {
+        //dd($license);
         if (!is_array($license)) {
             $this->error("Invalid license data provided to verificationParametre.");
             return;
@@ -77,15 +79,23 @@ class AppInstallCommand extends Command
 
         $productName = $license['product']['name'] ?? 'unknown product';
         $domain = $license['domain'] ?? 'unknown domain';
-        $maxUsers = $license['max_users'] ?? 0;
-        $maxProjects = $license['product']['max_projects'] ?? 0;
+        $maxUsers   = (int) data_get(
+            $license,
+            'product.info_stripe.metadata.max_users',
+            data_get($license, 'max_users', 0)
+        );
+        $maxStorage = (int) data_get(
+            $license,
+            'product.info_stripe.metadata.storage_limit',
+            data_get($license, 'product.storage_limit', 0)
+        );
 
         $this->info("Produit: " . $productName);
         $this->info("Parametre de la license: License attribué à " . $domain);
         $this->info("Parametre de la license: License Max Users " . $maxUsers);
-        $this->info("Parametre de la license: License Max Folders " . $maxProjects);
+        $this->info("Parametre de la license: License Limit Storage " . $maxStorage);
 
-        if ($productName === 'unknown product' || $domain === 'unknown domain' || $maxUsers === 0 || $maxProjects === 0) {
+        if ($productName === 'unknown product' || $domain === 'unknown domain' || $maxUsers === 0 || $maxStorage === 0) {
             $this->warn("Warning: Some critical license parameters are missing or invalid.");
         }
     }
@@ -93,37 +103,94 @@ class AppInstallCommand extends Command
     public function initializeSettings($license)
     {
         $this->line("Initialisation des paramètres de la license");
+
+        // Backward-compatible license key extraction
+        $licenseKey = $license['service_code'] ?? $license['license_key'] ?? null;
+
+        // Validate license key before proceeding
+        if (empty($licenseKey)) {
+            $this->error("Error: No valid license key found in license data. Please provide a valid license with either 'service_code' or 'license_key'.");
+            $this->error("Installation abortée due to missing license key.");
+            return Command::FAILURE;
+        }
+
+        // Safe nested key access with fallbacks
+        $company = isset($license['customer']['entreprise'])
+            ? $license['customer']['entreprise']
+            : (isset($license['customer']['company_name'])
+                ? $license['customer']['company_name']
+                : ($license['company'] ?? null));
+
+        $maxUsers = isset($license['product']['info_stripe']['metadata']['max_users'])
+            ? $license['product']['info_stripe']['metadata']['max_users']
+            : ($license['max_users'] ?? 0);
+
+        $maxFolders = isset($license['product']['max_projects'])
+            ? $license['product']['max_projects']
+            : ($license['max_folders'] ?? 1);
+
+        $maxStorages = isset($license['product']['info_stripe']['metadata']['storage_limit'])
+            ? $license['product']['info_stripe']['metadata']['storage_limit']
+            : ($license['max_storages'] ?? 0);
+
+        $expiredAt = $license['expirationDate']
+            ?? $license['expires_at']
+            ?? $license['expired_at']
+            ?? null;
+
         $config = Setting::updateOrCreate(
-            ["license_key" => $license['license_key']],
+            ["license_key" => $licenseKey],
             [
-                "company"      => $license['customer']['company_name']    ?? null,
-                "license_key"  => $license['license_key'],
-                "status"       => $license['status']                      ?? null,
-                "max_users"    => $license['max_users']                   ?? 0,
-                "max_folders"  => $license['product']['max_projects']     ?? 0,
-                "max_storages" => $license['product']['storage_limit']    ?? 0,
-                "expired_at"   => $license['expires_at']                  ?? null,
+                "company"      => $company,
+                "license_key"  => $licenseKey,
+                "status"       => $license['status'] ?? null,
+                "max_users"    => $maxUsers,
+                "max_folders"  => $maxFolders,
+                "max_storages" => $maxStorages,
+                "expired_at"   => $expiredAt,
             ]
         );
         $this->info("Paramètres de la license initialisés");
-        $this->info("Company: " . $config->company);
+        $this->info("Entreprise: " . $config->company);
+
+        return Command::SUCCESS;
     }
 
     public function installModules($license)
     {
         $this->line("Initialisation des modules saas");
-        $moduleSaas = $license['product']['included_modules'] ?? [];
+        // Add fallback to included_modules for backward compatibility
+        $moduleSaas = $license['product']['features'] ?? $license['product']['included_modules'] ?? $license['included_modules'] ?? [];
         if (empty($moduleSaas)) {
             $this->info("Aucun module à installer");
             return;
         }
         foreach ($moduleSaas as $moduleData) {
+            // Check if module ID exists to avoid undefined index errors
+            if (!isset($moduleData['id'])) {
+                $this->error("Error: Module '" . ($moduleData['name'] ?? 'Unknown') . "' has no ID identifier");
+                continue;
+            }
+
             $this->line("Installation du module " . $moduleData['name']);
+
+            // Add fallback for slug field (use 'key' if 'slug' is missing)
+            $slug = $moduleData['slug'] ?? $moduleData['key'] ?? null;
+
+            // Normalize slug using Str::slug() for consistent formatting
+            $slug = Str::slug($slug ?? '');
+
+            // Validate that we have a valid slug AFTER normalization
+            if (empty($slug)) {
+                $this->error("Error: Module '" . ($moduleData['name'] ?? 'Unknown') . "' has no slug or key identifier");
+                continue;
+            }
+
             $createdModule = Module::updateOrCreate(
                 ['saas_module_id' => $moduleData['id']],
                 [
                     "name" => $moduleData['name'],
-                    "slug" => $moduleData['key'],
+                    "slug" => $slug,
                     "description" => $moduleData['description'],
                     "is_activable" => true,
                     "active" => false,
@@ -143,12 +210,22 @@ class AppInstallCommand extends Command
             return;
         }
         foreach ($options as $option) {
+            // Check if option ID exists to avoid undefined index errors
+            if (!isset($option['id'])) {
+                $this->error("Error: Option '" . ($option['name'] ?? 'Unknown') . "' has no ID identifier");
+                continue;
+            }
+
             $this->line("Installation de l'option " . $option['name']);
+
+            // Normalize the slug using Str::slug() for consistency
+            $optionSlug = Str::slug($option['key'] ?? '');
+
             Option::updateOrCreate(
                 ["saas_option_id" => $option['id']],
                 [
                     "name"        => $option['name'],
-                    "slug"        => $option['key'],
+                    "slug"        => $optionSlug,
                     "description" => $option['description'],
                     "is_enabled"  => $option['pivot']['enabled']  ?? false,
                     "expires_at"  => $option['pivot']['expires_at'] ?? null,
